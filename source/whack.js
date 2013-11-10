@@ -7,6 +7,14 @@
 // ------------------------------------------------------------------------------------------------
 /** @define {boolean} */	var DEBUG = true;
 /** @define {string} */		var WHACK_NAME = "Whack";
+/** @define {boolean} */	var AUTOCOMPILE = true;
+/** @define {boolean} */	var EXTENDABLE_API = true;
+
+// COMPATIBILITY FLAGS
+// ------------------------------------------------------------------------------------------------
+/** @define {boolean} */	var HAS_JQUERY = true;
+/** @define {boolean} */	var HAS_BACKBONE = true;
+
 
 // SYNTAX OPTS
 // ------------------------------------------------------------------------------------------------
@@ -25,6 +33,15 @@
 /** @define {boolean} */	var SUPPORT_EXTENDS = true;
 /** @define {boolean} */	var SUPPORT_PARTIALS = true;
 /** @define {boolean} */	var SUPPORT_FILTERS = true;
+
+// FILTERS OPTS
+// ------------------------------------------------------------------------------------------------
+/** @define {boolean} */	var SUPPORT_FILTER_TRIM = true;
+/** @define {boolean} */	var SUPPORT_FILTER_ABS  = true;
+/** @define {boolean} */	var SUPPORT_FILTER_CAPITALIZE  = true;
+
+
+
 
 +function(_window){
 
@@ -52,15 +69,27 @@
 	var CODE_FIRST, CODE_LAST;
 
 
+	CODE_FIRST = "var "+OUTPUT_VAR+"=''";
+
+	if( HAS_BACKBONE ){
+		var regexBackbone = /(\w+)\.(\w+)/g;
+		CODE_FIRST = CODE_FIRST + ",_bb=data&&!!data.cid;"
+	} else {
+		CODE_FIRST = CODE_FIRST + ";";
+	}
+
+
 	// It is possible to use Whack in underscore's style
 	// E.g.  {a: 2} => a
 	if( USE_WITH ) {
-		CODE_FIRST = "var "+OUTPUT_VAR+"='';with(data){",
+		CODE_FIRST = CODE_FIRST + "with(data){";
 		CODE_LAST  = "}return " + OUTPUT_VAR;
 	} else {
-		CODE_FIRST = "var "+OUTPUT_VAR+"='';",
 		CODE_LAST  = "return " + OUTPUT_VAR;
 	}
+
+	
+
 
 	// Code parse shortcuts
 	var parsemap;
@@ -106,6 +135,24 @@
 	if( SUPPORT_PARTIALS ) {
 		parsemap["include"] = function(code) {
 			var r = regexOP.test(code) && _RegExp.$1;
+
+			if(AUTOCOMPILE && !_cacheCompiled[r]){
+				buildTemplate(r);
+				_cachePartials[r] = _cacheCompiled[r].replace(CODE_FIRST, "").replace(CODE_LAST, "")
+				if(DEBUG && !_cachePartials[r]) {
+					console.error("Autocompilation for", r, "failed");
+				}
+			}
+
+			if( DEBUG ) {
+				if( !_cacheCompiled[r] ) {
+					console.error("There is no compiled template named " + r);
+					return {
+						operator : KEY_JS,
+						_code : ";"
+					};
+				}
+			}
 			return {
 				operator : KEY_JS,
 				_code : _cachePartials[r] || (_cachePartials[r] = _cacheCompiled[r].replace(CODE_FIRST, "").replace(CODE_LAST, ""))
@@ -183,29 +230,38 @@
 				: (DOMtext.nodeValue = code) && DOMelement.innerHTML;
 		}
 
-		_filters["trim"] = function( code ) {
-			return code.replace(/^\s+|\s+$/g, '');
+		if( SUPPORT_FILTER_TRIM ) {
+			if( HAS_JQUERY ) {
+				_filters["trim"] = $['trim'];
+			} else {
+				_filters["trim"] = function( code ) {
+					return $.trim( code );
+				}
+			}
 		}
 
 
-		_filters["abs"] = function( code ){
-			return Math.abs(Number(code));
+		if( SUPPORT_FILTER_ABS ) {
+			_filters["abs"] = function( code ){
+				return Math.abs(Number(code));
+			}
 		}
 
 
-		_filters["capitalize"] = function( code ){
-			return code.charAt(0).toUpperCase()+code.substr(1);
+		if( SUPPORT_FILTER_CAPITALIZE ) {
+			_filters["capitalize"] = function( code ){
+				return code.charAt(0).toUpperCase()+code.substr(1);
+			}
 		}
-
 
 	}
 	
 	
 	// Precompiled regex
 	// http://jsperf.com/regexp-test-search-vs-indexof/27
-	var regexFOR	= /\(([\w\.]+),?\s*(\w+)?\)/,
-		regexOP		= /(\w+)\s*$/,
-		regexEXTEND	= /extends\s+(\w+)/,
+	var regexFOR	= /\(([\w\.\_]+),?\s*(\w+)?\)/,
+		regexOP		= /([\w\-#_]+)\s?$/,
+		regexEXTEND	= /extends\s+([\w\-_#]+)/,
 		regexPARSE 	= new _RegExp("^\\s*(" + Object.keys(parsemap).join("|") + ")\\b");
 
 
@@ -221,9 +277,22 @@
 		var extended;
 		var parentID;
 
-
 		if( SUPPORT_EXTENDS && (parentID = regexEXTEND.test(tokens[0]) && _RegExp.$1)) {
-			console.warn( _cacheParsing[parentID] );
+			
+			if(AUTOCOMPILE && !_cacheParsing[parentID]){
+				buildTemplate( parentID );
+				if(DEBUG && !_cacheParsing[parentID]) {
+					console.error("Autocompilation for", parentID, "failed");
+				}
+			}
+
+			if( DEBUG ) {
+				if( !_cacheParsing[parentID] ) {
+					console.error("There is no compiled template named " + parentID);
+					console.info("To prevent this error, please use autocompile flag or precompiled templates");
+					return false;
+				}
+			}
 			_cacheParsing[name] = _cacheParsing[parentID];
 			parsedLines = _cacheParsing[name];
 			parsedLinesIndex = parsedLines.len;
@@ -241,7 +310,6 @@
 				}
 			}
 		}
-
 		
 		// parse string tpl
 		for(var tokenIndex = 0, tokensLength = tokens.length; tokenIndex < tokensLength; tokenIndex++){
@@ -271,12 +339,17 @@
 						var key = code._code;
 						var tempLine = tokens[++tokenIndex];
 						var partial = [tempLine];
-						// console.warn( tempLine )
+						var endblock = 0;
+
 
 						if(tempLine.indexOf("endblock") < 0)
-							while((tempLine = tokens[++tokenIndex]) !== undefined && tempLine.indexOf("endblock") < 0 ) {
-								// console.warn( tempLine )
-								partial.push(tempLine);
+							while( !endblock && (tempLine = tokens[++tokenIndex]) !== undefined ) {
+								if(tempLine.indexOf("endblock") > -1) {
+									endblock = 1;
+									partial.push(tempLine.split(CLOSE_TAG)[0]);
+								} else {
+									partial.push(tempLine);
+								}
 							}
 
 						// partial.pop();
@@ -287,14 +360,19 @@
 
 						var render = compileTemplateString(partial, key, true).replace(CODE_FIRST, "").replace(CODE_LAST,"");
 						_cachePartials[key] = render;
-						console.log(">>>>>>", partial, " >>>>> ", render, " >>>>> ", key );
+ 
+						if( DEBUG ) {
+							console.warn(">>>>>>", partial, " >>>>> ", render, " >>>>> ", key );
+						}
 
 
 						if( extended ){
 
 							for(var j = -1, l2 = parsedLinesIndex; ++j < l2;) {
 								if(parsedLines[j].operator === KEY_BLOCK){
-									console.warn(parsedLines[j], _cacheParsing[parentID][j], parentID, name)
+									if( DEBUG ) {
+										console.warn(parsedLines[j], _cacheParsing[parentID][j], parentID, name)
+									}
 									var testkey = key.replace(parentID, name);
 									if( testkey === key ) {
 										parsedLines[j]  = {
@@ -322,16 +400,13 @@
 					var symbol = code.charAt(0);
 					var operator;
 
-					if(symbol ==' '){
+					if(symbol === ' '){
 						operator = KEY_JS;
 
-					} else if(symbol=='!'){ // comments
+					} else if(symbol === OPERATOR_COMMENT){ // comments
 
 						continue;
 
-					} else if(symbol=='~'){ //OPERATOR_ECHO var escaped
-						operator = "-";
-						code = '('+code.substring(1)+'.replace(/&/g, "&amp;").replace(/\'/g,"&#39;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;").replace(/\\//g,"&#x2F;"))';
 					} else {
 						
 						if(symbol === OPERATOR_ECHO ) {
@@ -342,7 +417,15 @@
 							var f = _RegExp.$1;
 							code = code.replace("| " + f, "");
 							code = WHACK_NAME + ".f." + f + "(" + code + ")";
+						}
 
+						if( HAS_BACKBONE ) {
+							if( regexBackbone.test( code )) {
+								var m = _RegExp.$1, n = _RegExp.$2;
+								if( m && n ) {
+									code = "(_bb&&"+m+".cid?" + m + ".get('" + n + "'):" + code + ")";
+								}
+							}
 						}
 
 						operator = OPERATOR_ECHO;
@@ -398,13 +481,16 @@
 
 			} else if(operator === KEY_FOR){
 				
-				var iterator = v[2] || "_i",
-					item = v[1] || "item";
+				var item = v[1] || "item",
+					iter = "i" + tplHash,
+					len  = "l" + tplHash,
+					arr  = "a" + tplHash;
+
+				tplHash++;
 				
 				compiledLines[compiledLinesIndex++] = (
-					'for(var ' + iterator + '=0,' + item + ',_l=' + v[0] + ',_c=_l.length;' + 
-						iterator + '<_c;' + iterator + '++){' + 
-							item + '=_l[' + iterator + ']'
+					'for(var '+ iter + '=0,' + item + ',' + arr + '=' + v[0] + ',' + len + '=' + arr + '.length;' + 
+						iter + '<' + len + ';' + iter + '++){' + item + '=' + arr + '[' + iter + ']'
 				);
 
 			} else if( SUPPORT_EXTENDS && operator === KEY_BLOCK ){
@@ -413,9 +499,9 @@
 
 			} else {
 				if(lastOperator !== OPERATOR_ECHO){
-					compiledLines[compiledLinesIndex++] = (OUTPUT_VAR + '+=') + v;
+					compiledLines[compiledLinesIndex++] = (OUTPUT_VAR + '+=') + '(' + v + ')';
 				} else {
-					compiledLines[compiledLinesIndex++] = '+' + v
+					compiledLines[compiledLinesIndex++] = '+(' + v + ')'
 				}
 			}
 			lastOperator = operator;
@@ -432,7 +518,18 @@
 	// 	
 	function buildTemplate(templateString, templateID){
 
-		templateID = templateID || ++tplHash;
+		
+
+		if(templateString.charAt(0) === "#"){
+			templateID = templateString;
+			if(HAS_JQUERY) {
+				templateString = $(templateString).html();
+			} else {
+				templateString = document.getElementById(templateString.substr(1)).innerHTML;
+			}
+		}
+
+		!templateID && (templateID = "t" + tplHash++);
 
 		if( DEBUG ) {
 			console.group( "tpl: " + templateID );
@@ -448,7 +545,7 @@
 
 		if( DEBUG ) {
 			console.log("Compiled function: ", compiled);
-			console.groupEnd("tpl: " + templateID)
+			console.groupEnd("tpl: " + templateID);
 		}
 
 		var fn = new Function('data', compiled);
