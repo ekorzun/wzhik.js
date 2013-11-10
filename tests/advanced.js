@@ -84,6 +84,33 @@ test("extends", function(){
 });
 
 
-// test("escaping strings", function(){
+test("Backbone models", function(){
+	var expect, tpl;
+	var Model = Backbone.Model.extend({
+		age : function(){
+			return (new Date).getFullYear() - this.get("year")
+		}
+	});
 
-// });
+	var model = new Model({
+		id : 32,
+		year : 1990,
+		name : "John"
+	});
+
+
+	expect = "John, " + ((new Date).getFullYear() - 1990);
+	tpl = testTPL2(
+		"Backbone-Test",
+		"{{= data.name }}, {{= data.age()}}"
+	)( model );
+	ok( expect == tpl, "Backbone passed");
+	
+});
+
+
+
+
+
+
+
