@@ -242,11 +242,13 @@
 						var key = code._code;
 						var tempLine = tokens[++tokenIndex];
 						var partial = [tempLine];
+						// console.warn( tempLine )
 
-						while((tempLine = tokens[++tokenIndex]) !== undefined && tempLine.indexOf("endblock") < 0 ) {
-							// console.warn( tempLine )
-							partial.push(tempLine);
-						}
+						if(tempLine.indexOf("endblock") < 0)
+							while((tempLine = tokens[++tokenIndex]) !== undefined && tempLine.indexOf("endblock") < 0 ) {
+								// console.warn( tempLine )
+								partial.push(tempLine);
+							}
 
 						// partial.pop();
 						// --tokenIndex;
