@@ -40,6 +40,17 @@ test( "variables and expressions", function() {
 	tpl = testTPL("{{= data.array }}")({array: array});
 	ok(expect == tpl, "array to string passed");
 
+
+	expect = "4 < 8";
+	tpl = testTPL(
+		"{{= data.four() + ' < ' + data.eight()}}"
+	)({
+		four : function(){return 4},
+		eight : function(){return 8}
+	});
+	ok(expect == tpl, "function expressions passed");
+
+
 });
 
 
@@ -125,7 +136,5 @@ test("loops", function(){
 	)({array: array});
 	ok(expect == tpl, "js for passed");
 
-
-
-})
+});
 
