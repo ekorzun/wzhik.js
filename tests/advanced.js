@@ -1,11 +1,39 @@
 module("Advanced templates");
 
 
-// test("escapes and filters", function(){
-// 	var expect, tpl;
+test("escapes and filters", function(){
+	var expect, tpl;
 
-// 	ok(true, ":D")
-// });
+	expect = "x";
+	tpl = testTPL("{{ var x = '        x      '}}{{= x | trim}}")();
+	ok(expect == tpl, "trim filter passed");
+
+
+	expect = "10";
+	tpl = testTPL("{{ var x =  -10 }}{{= x | abs}}")();
+	ok(expect == tpl, "abs filter passed");
+
+
+	expect = "Korzhik";
+	tpl = testTPL("{{ var x =  'korzhik' }}{{= x | capitalize}}")();
+	ok(expect == tpl, "capitalize filter passed");
+
+
+	expect = "Korzhik";
+	tpl = testTPL("{{ var x =  'korzhik' }}{{= x | capitalize}}")();
+	ok(expect == tpl, "capitalize filter passed");
+
+
+	expect = "&lt;img src=&#x27;xxx.jpg?a=1&amp;b=2&#x27; alt=&quot;title&quot; &#x2F;&gt;";
+	tpl = testTPL2(
+		"escapeHTML-tpl",
+		"{{= data.str | escapeHTML}}"
+	)({
+		str : "<img src='xxx.jpg?a=1&b=2' alt=\"title\" />"
+	});
+	ok(expect == tpl, "escapeHTML filter passed");
+
+});
 
 
 test("partials", function(){
