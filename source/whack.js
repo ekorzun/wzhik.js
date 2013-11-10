@@ -28,6 +28,7 @@
 
 +function(_window){
 
+
 	var tplHash = 0;
 
 	// regexp.test is the fastest way
@@ -38,7 +39,8 @@
 	// Operators codes
 	var KEY_JS = 1,
 		KEY_FOR = 2,
-		KEY_BLOCK = 3;
+		KEY_BLOCK = 3,
+		KEY_FILTER = 4;
 
 	// Cache indexes
 	var _cacheCompiled = {},
@@ -67,8 +69,11 @@
 
 	if( SUPPORT_SHORTCODES ) {
 		parsemap = {
+
 			"end" : function(){return {operator: KEY_JS, _code: '}'}},
+
 			"else" : function(){return {operator: KEY_JS, _code: '} else {'}},
+
 			"if" : function(code){
 				var p = code.lastIndexOf(':');
 				var notTernearyExp = code.split(':').slice(-1)[0].trim()==='';
@@ -158,17 +163,41 @@
 			DOMelement.appendChild( DOMtext );
 		}
 
-		// http://jsperf.com/htmlencoderegex/40
+		var 
+			amp = /&/g,
+			q1 	= /"/g,
+			q2	= /'/g,
+			t1	= />/g,
+			t2	= /</g,
+			sl 	= /\//g;
+
 		_filters["escapeHTML"] = function( code, name ) {
 			return isChrome
 				? code
-					.replace('&', '&amp;', "g")
-					.replace('"', '&quot;', "g")
-					.replace("'", '&#39;', "g")
-					.replace('<', '&lt;', "g")
-					.replace('>', '&gt;', "g")
+					.replace(amp, '&amp;')
+					.replace(t2, '&lt;')
+					.replace(t1, '&gt;')
+					.replace(q1, '&quot;')
+					.replace(q2, '&#x27;')
+					.replace(sl,'&#x2F;')
 				: (DOMtext.nodeValue = code) && DOMelement.innerHTML;
 		}
+
+		_filters["trim"] = function( code ) {
+			return code.replace(/^\s+|\s+$/g, '');
+		}
+
+
+		_filters["abs"] = function( code ){
+			return Math.abs(Number(code));
+		}
+
+
+		_filters["capitalize"] = function( code ){
+			return code.charAt(0).toUpperCase()+code.substr(1);
+		}
+
+
 	}
 	
 	
@@ -309,6 +338,13 @@
 							code = code.substring(1);
 						}
 
+						if( SUPPORT_FILTERS && /\|\s(\w+)/.test(code)){
+							var f = _RegExp.$1;
+							code = code.replace("| " + f, "");
+							code = WHACK_NAME + ".f." + f + "(" + code + ")";
+
+						}
+
 						operator = OPERATOR_ECHO;
 					}
 
@@ -427,6 +463,10 @@
 		return fn;
     }
 
+
+    if(SUPPORT_FILTERS) {
+    	buildTemplate['f'] = _filters;
+    }
 
     
 
