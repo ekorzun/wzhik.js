@@ -1,0 +1,35 @@
+<html>
+<head>
+	<script src="source/whack.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+	<link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.12.0.css">
+
+	<script>
+		function testTPL(){
+			return Whack(Array.prototype.slice.call(arguments).join(""));
+		}
+
+		function testTPL2(){
+			var args = Array.prototype.slice.call(arguments);
+			var name = args[0];
+			args.shift();
+			return Whack(args.join(""), name);
+		}
+	</script>
+</head>
+<body>
+	<div id="qunit"></div>
+	<div id="qunit-fixture"></div>
+
+
+	<!-- Multi line tpl -->
+	<script type="text/tpl" id='js-tpl-1'>
+		{{ var x = 5 }}
+	</script>
+
+
+	<script src="http://code.jquery.com/qunit/qunit-1.12.0.js"></script>
+	<!-- <script src="tests/basic.js"></script> -->
+	<script src="tests/advanced.js"></script>
+</body>
+</html>
