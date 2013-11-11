@@ -63,13 +63,14 @@
 
 	// Code defaults
 	var CODE_FIRST, CODE_LAST;
-	CODE_FIRST = "var "+OUTPUT_VAR+"=''";
+
 
 	if( EXPERIMENTAL_HAS_BACKBONE ){
 		var regexBackbone = /(\w+)\.([\w_]+)(?!\(.*\))/g;
-		CODE_FIRST = CODE_FIRST + ",_bb=data&&!!data.cid;"
+		CODE_FIRST = "var "+OUTPUT_VAR+",_bb=data&&!!data.cid;"
 	} else {
-		CODE_FIRST = CODE_FIRST + ";";
+		CODE_FIRST = "var "+OUTPUT_VAR + ";";
+
 	}
 
 
@@ -77,9 +78,9 @@
 	// E.g.  {a: 2} => a
 	if( USE_WITH ) {
 		CODE_FIRST = CODE_FIRST + "with(data){";
-		CODE_LAST  = "}return " + OUTPUT_VAR;
+		var CODE_LAST  = "}return " + OUTPUT_VAR;
 	} else {
-		CODE_LAST  = "return " + OUTPUT_VAR;
+		var CODE_LAST  = "return " + OUTPUT_VAR;
 	}
 
 
