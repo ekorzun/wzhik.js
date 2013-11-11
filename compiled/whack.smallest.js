@@ -1,85 +1,105 @@
-+function(m) {
-  var n = 0, q = m.RegExp, u = {}, r = {}, v = {}, s = {end:function() {
-    return{b:1, a:"}"}
-  }, "else":function() {
-    return{b:1, a:"} else {"}
-  }, elseif:function(a) {
-    return s["if"]("} else " + a)
-  }, "if":function(a) {
-    var c = a.lastIndexOf(":"), f = "" === a.split(":").slice(-1)[0].trim();
-    -1 < c && f ? a = a.substr(0, c) + "{" : -1 === c && "" === a.split(")").slice(-1)[0].trim() && (a += "{");
-    return{b:1, a:a}
-  }, each:function(a) {
-    var c = w.test(a) && q;
-    console.log("Parsing <for>: ", a, c);
-    return{b:2, a:[c.$1, c.$2]}
-  }}, w = /\(([\w\.\_]+),?\s*(\w+)?\)/, x = new q("^\\s*(" + Object.keys(s).join("|") + ")\\b");
-  m.WhackSmallest = function(a, c) {
-    "#" === a.charAt(0) && (c = a, a = document.getElementById(a.substr(1)).innerHTML);
-    !c && (c = "t" + n++);
-    console.group("tpl: " + c);
-    if(r[a]) {
-      return r[a]
++function(n) {
+  function f(a, d) {
+    "#" === a.charAt(0) && (d = a, a = document.getElementById(a.substr(1)).innerHTML);
+    !d && (d = "t" + r++);
+    console.group("tpl: " + d);
+    if(t[a]) {
+      return t[a]
     }
-    var f, g;
-    g = c;
-    var l, e, k = a.split("%>");
-    l = 1;
-    e = {0:{b:1, a:"var _o;"}};
-    for(var h = 0, p = k.length;h < p;h++) {
-      var b = k[h].replace(/\\/g, "\\\\").split("<%");
-      "" !== b[0] && (e[l++] = {b:"=", a:"'" + b[0].replace(/'/g, "\\'").replace(/\n/g, "\\n") + "'"});
+    var g, h;
+    h = d;
+    var m, e, k = a.split("%>");
+    m = 1;
+    e = {0:{b:p, a:B}};
+    for(var l = 0, f = k.length;l < f;l++) {
+      var b = k[l].replace(/\\/g, "\\\\").split("<%");
+      "" !== b[0] && (e[m++] = {b:"=", a:"'" + b[0].replace(/'/g, "\\'").replace(/\n/g, "\\n") + "'"});
       if(b = b[1]) {
-        var d = x.test(b) && q.$1;
-        if(d) {
-          b = s[d](b, g), e[l++] = b
+        var c = C.test(b) && s.$1;
+        if(c) {
+          b = u[c](b, h), e[m++] = b
         }else {
-          d = b.charAt(0);
-          if(" " === d) {
-            d = 1
+          c = b.charAt(0);
+          if(" " === c) {
+            c = p
           }else {
-            if("!" === d) {
+            if("!" === c) {
               continue
             }else {
-              "=" === d && (b = b.substring(1)), d = "="
+              "-" === c ? (c = "=", b = "WhackSmallest.e(" + b.substring(1) + ")") : ("=" === c && (b = b.substring(1)), /\|\s(\w+)/.test(b) && (c = s.$1, b = b.replace("| " + c, ""), b = "WhackSmallest.f." + c + "(" + b + ")"), c = "=")
             }
           }
-          d && (e[l++] = {b:d, a:b})
+          c && (e[m++] = {b:c, a:b})
         }
       }
     }
+    e.c = m;
     console.log("Parsed lines: ", e);
-    g = v[g] = e;
-    l = g.c;
-    e = Array(l);
-    for(p = k = 0;p < l;p++) {
-      b = g[p];
-      h = b.b;
-      if(f !== h || 1 === h) {
+    h = D[h] = e;
+    m = h.c;
+    e = Array(m);
+    for(f = k = 0;f < m;f++) {
+      b = h[f];
+      l = b.b;
+      if(g !== l || l === p) {
         e[k++] = ";"
       }
       b = b.a;
-      if(1 === h) {
+      if(l === p) {
         e[k++] = b
       }else {
-        if(2 === h) {
-          f = b[1] || "item";
-          var d = "i" + n, m = "l" + n, t = "a" + n;
-          n++;
-          e[k++] = "for(var " + d + "=0," + f + "," + t + "=" + b[0] + "," + m + "=" + t + ".length;" + d + "<" + m + ";" + d + "++){" + f + "=" + t + "[" + d + "]"
+        if(l === v) {
+          g = b[1] || "item";
+          var c = "i" + r, n = "l" + r, q = "a" + r;
+          r++;
+          e[k++] = "for(var " + c + "=0," + g + "," + q + "=" + b[0] + "," + n + "=" + q + ".length;" + c + "<" + n + ";" + c + "++){" + g + "=" + q + "[" + c + "]"
         }else {
-          "=" !== f ? e[k++] = "_o+=(" + b + ")" : e[k++] = "+(" + b + ")"
+          "=" !== g ? e[k++] = "_o+=(" + b + ")" : e[k++] = "+(" + b + ")"
         }
       }
-      f = h
+      g = l
     }
-    console.log("Compiled function: ", e);
-    f = e.join("");
-    console.groupEnd("tpl: " + c);
-    g = new Function("data", f);
-    r[a] = g;
-    c && !u[c] && (u[c] = f);
-    return g
+    e[0] = "try{" + e[0];
+    e[k - 1] = "}catch(e){console.error(e.message);};return _o";
+    console.log("Compiled function: ", e.join(""));
+    g = e.join("");
+    console.groupEnd("tpl: " + d);
+    h = new Function("data", g);
+    t[a] = h;
+    d && !w[d] && (w[d] = g);
+    return h
   }
+  var r = 0, s = n.RegExp, p = 1, v = 2, w = {}, t = {}, D = {}, B = "var _o='';", u = {end:function() {
+    return{b:p, a:"}"}
+  }, "else":function() {
+    return{b:p, a:"} else {"}
+  }, elseif:function(a) {
+    return u["if"]("} else " + a)
+  }, "if":function(a) {
+    var d = a.lastIndexOf(":"), f = "" === a.split(":").slice(-1)[0].trim();
+    -1 < d && f ? a = a.substr(0, d) + "{" : -1 === d && "" === a.split(")").slice(-1)[0].trim() && (a += "{");
+    return{b:p, a:a}
+  }, each:function(a) {
+    var d = E.test(a) && s;
+    console.log("Parsing <for>: ", a, d);
+    return{b:v, a:[d.$1, d.$2]}
+  }}, q = {}, x = n.chrome, y = n.document;
+  if(x) {
+    var z = y.createTextNode(""), A = y.createElement("span");
+    A.appendChild(z)
+  }
+  var F = /&/g, G = /"/g, H = /'/g, I = />/g, J = /</g, K = /\//g;
+  q.escapeHTML = function(a) {
+    return x ? a.replace(F, "&amp;").replace(J, "&lt;").replace(I, "&gt;").replace(G, "&quot;").replace(H, "&#x27;").replace(K, "&#x2F;") : (z.nodeValue = a) && A.innerHTML
+  };
+  var E = /\(([\w\.\_]+),?\s*(\w+)?\)/, C = new s("^\\s*(" + Object.keys(u).join("|") + ")\\b");
+  f.f = q;
+  f.addFilter = function(a, d) {
+    q[a] = d
+  };
+  f.e = function(a) {
+    return f.f.escapeHTML(a)
+  };
+  n.WhackSmallest = f
 }(this);
 
