@@ -197,7 +197,7 @@
 			isChrome = _window['chrome'],
 			doc = _window.document;
 
-		if( isChrome ) {
+		if( !isChrome ) {
 			var DOMtext 	= doc.createTextNode(""),
 				DOMelement 	= doc.createElement("span");
 			DOMelement.appendChild( DOMtext );

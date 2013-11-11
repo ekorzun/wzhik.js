@@ -80,7 +80,7 @@
     a = G.test(a) && s.$1;
     return{b:n, a:y[a] || (y[a] = v[a].replace(w, "").replace("return _o", ""))}
   }}, q = {}, z = p.chrome, A = p.document;
-  if(z) {
+  if(!z) {
     var B = A.createTextNode(""), C = A.createElement("span");
     C.appendChild(B)
   }

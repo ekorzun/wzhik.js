@@ -77,7 +77,7 @@
     a = E.test(a) && s;
     return{b:w, a:[a.$1, a.$2]}
   }}, q = {}, y = n.chrome, z = n.document;
-  if(y) {
+  if(!y) {
     var A = z.createTextNode(""), B = z.createElement("span");
     B.appendChild(A)
   }
