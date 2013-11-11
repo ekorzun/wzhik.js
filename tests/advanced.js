@@ -4,19 +4,19 @@ module("Advanced templates");
 test("escapes and filters", function(){
 	var expect, tpl;
 
-	expect = "x";
-	tpl = testTPL("{{ var x = '        x      '}}{{= x | trim}}")();
-	ok(expect == tpl, "trim filter passed");
+	// expect = "x";
+	// tpl = testTPL("{{ var x = '        x      '}}{{= x | trim}}")();
+	// ok(expect == tpl, "trim filter passed");
 
 
-	expect = "10";
-	tpl = testTPL("{{ var x =  -10 }}{{= x | abs}}")();
-	ok(expect == tpl, "abs filter passed");
+	// expect = "10";
+	// tpl = testTPL("{{ var x =  -10 }}{{= x | abs}}")();
+	// ok(expect == tpl, "abs filter passed");
 
 
-	expect = "Korzhik";
-	tpl = testTPL("{{ var x =  'korzhik' }}{{= x | capitalize}}")();
-	ok(expect == tpl, "capitalize filter passed");
+	// expect = "Korzhik";
+	// tpl = testTPL("{{ var x =  'korzhik' }}{{= x | capitalize}}")();
+	// ok(expect == tpl, "capitalize filter passed");
 
 
 	expect = "&lt;img src=&#x27;xxx.jpg?a=1&amp;b=2&#x27; alt=&quot;title&quot; &#x2F;&gt;";
@@ -86,29 +86,29 @@ test("extends", function(){
 });
 
 
-test("Backbone models", function(){
-	var expect, tpl;
-	var Model = Backbone.Model.extend({
-		age : function(){
-			return (new Date).getFullYear() - this.get("year")
-		}
-	});
+// test("Backbone models", function(){
+// 	var expect, tpl;
+// 	var Model = Backbone.Model.extend({
+// 		age : function(){
+// 			return (new Date).getFullYear() - this.get("year")
+// 		}
+// 	});
 
-	var model = new Model({
-		id : 32,
-		year : 1990,
-		name : "John"
-	});
+// 	var model = new Model({
+// 		id : 32,
+// 		year : 1990,
+// 		name : "John"
+// 	});
 
 
-	expect = "John, " + ((new Date).getFullYear() - 1990);
-	tpl = testTPL2(
-		"Backbone-Test",
-		"{{= data.name }}, {{= data.age()}}"
-	)( model );
-	ok( expect == tpl, "Backbone passed");
+// 	expect = "John, " + ((new Date).getFullYear() - 1990);
+// 	tpl = testTPL2(
+// 		"Backbone-Test",
+// 		"{{= data.name }}, {{= data.age()}}"
+// 	)( model );
+// 	ok( expect == tpl, "Backbone passed");
 
-});
+// });
 
 
 
