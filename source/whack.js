@@ -22,7 +22,7 @@
 /** @define {string} */		var OPEN_TAG = "{{";
 /** @define {string} */		var CLOSE_TAG = "}}";
 /** @define {string} */		var OPERATOR_ECHO = "=";
-/** @define {string} */		var OPERATOR_ECHO_ESCAPE = "~";
+/** @define {string} */		var OPERATOR_ESCAPED_ECHO = "~";
 /** @define {string} */		var OPERATOR_COMMENT = "!";
 /** @define {string} */		var OUTPUT_VAR = "_o";
 
@@ -57,22 +57,22 @@
 	var KEY_JS = 1,
 		KEY_FOR = 2,
 		KEY_BLOCK = 3,
-		KEY_FILTER = 4;
+		KEY_FILTER = 4,
+		KEY_ECHO = 5;
 
 	// Cache indexes
 	var _cacheCompiled = {},
 		_cacheCompiledByTpl = {},
 		_cachePartials = {},
-		_cacheParsing = {};
+		_cacheParsing = {},
+		_cachePartialsIndex = {};
 
 	// Code defaults
 	var CODE_FIRST, CODE_LAST;
-
-
 	CODE_FIRST = "var "+OUTPUT_VAR+"=''";
 
 	if( HAS_BACKBONE ){
-		var regexBackbone = /(\w+)\.(\w+)/g;
+		var regexBackbone = /(\w+)\.([\w_]+)/g;
 		CODE_FIRST = CODE_FIRST + ",_bb=data&&!!data.cid;"
 	} else {
 		CODE_FIRST = CODE_FIRST + ";";
@@ -88,20 +88,14 @@
 		CODE_LAST  = "return " + OUTPUT_VAR;
 	}
 
-	
-
-
-	// Code parse shortcuts
-	var parsemap;
-
 
 
 	if( SUPPORT_SHORTCODES ) {
-		parsemap = {
+		var parsemap = {
 
 			"end" : function(){return {operator: KEY_JS, _code: '}'}},
-
 			"else" : function(){return {operator: KEY_JS, _code: '} else {'}},
+			"elseif" : function( code ){return parsemap["if"]("} else " + code)},
 
 			"if" : function(code){
 				var p = code.lastIndexOf(':');
@@ -128,7 +122,7 @@
 			}
 		}
 	} else {
-		parsemap = {};
+		var parsemap = {};
 	}
 
 
@@ -218,7 +212,7 @@
 			t2	= /</g,
 			sl 	= /\//g;
 
-		_filters["escapeHTML"] = function( code, name ) {
+		_filters["escape"] = function( code, name ) {
 			return isChrome
 				? code
 					.replace(amp, '&amp;')
@@ -272,20 +266,24 @@
 
 		var parsedLinesIndex;
 		var parsedLines;
-		var tokens =  templateString.split( CLOSE_TAG );
+		var tokens = templateString.split( CLOSE_TAG );
 		
 		var extended;
 		var parentID;
 
+		// If Whack supports extend, it should be in the first line
 		if( SUPPORT_EXTENDS && (parentID = regexEXTEND.test(tokens[0]) && _RegExp.$1)) {
 			
+			// In autocompile mode make sure that parentID is exist
 			if(AUTOCOMPILE && !_cacheParsing[parentID]){
+				// Try to compile parent from DOM useing ID selector
 				buildTemplate( parentID );
 				if(DEBUG && !_cacheParsing[parentID]) {
 					console.error("Autocompilation for", parentID, "failed");
 				}
 			}
 
+			// Also compile may fails if autocompile opt isnt active
 			if( DEBUG ) {
 				if( !_cacheParsing[parentID] ) {
 					console.error("There is no compiled template named " + parentID);
@@ -293,15 +291,23 @@
 					return false;
 				}
 			}
+
+			// Everything is fine
 			_cacheParsing[name] = _cacheParsing[parentID];
 			parsedLines = _cacheParsing[name];
 			parsedLinesIndex = parsedLines.len;
+
+			// Remove first line with extend call
+			// and mark current template as extended
 			tokens.shift();
 			extended = 1;
+
 			if( DEBUG ) {
 				console.log("Extending: ", name, 'extends', parentID);
 			}
 		} else {
+
+			// Whack doesnt support extending, so we use default code
 			parsedLinesIndex = 1;
 			parsedLines = {
 				0 : {
@@ -311,12 +317,14 @@
 			}
 		}
 		
-		// parse string tpl
+		// Start parsing tokens
 		for(var tokenIndex = 0, tokensLength = tokens.length; tokenIndex < tokensLength; tokenIndex++){
 
+			// Make sure that code doesnt contains slashes
 			var line = tokens[tokenIndex].replace(/\\/g,'\\\\');
 			var l = line.split( OPEN_TAG );
 			
+			// Code may start with plain text
 			if( l[0] !== ''){
 				parsedLines[parsedLinesIndex++] = {
 					operator: OPERATOR_ECHO,
@@ -325,24 +333,35 @@
 			}
 			
 			var code = l[1];
-
 			if( code ){
 				
+				// Check any custom operator (include / for / if  etc)
 				var operator = regexPARSE.test(code) && _RegExp.$1;
-
 				if( operator ) {
 					
+					// Execute it
 					code = parsemap[operator]( code, name );
 
+					// It was the first line with Block statement
+					// So we need to compile sub-template from this block
+					// @todo add multilevel blocks
 					if( SUPPORT_EXTENDS && code && code.operator === KEY_BLOCK ) {
 
-						var key = code._code;
+						// Ignore current line, because it contains only block definition
+						// So we take the next
 						var tempLine = tokens[++tokenIndex];
 						var partial = [tempLine];
+
+						// Current template + block cache key
+						var key = code._code;
+
+						// End of block state
 						var endblock = 0;
 
+						// block may contains only one line/word
+						if(tempLine.indexOf("endblock") < 0) {
 
-						if(tempLine.indexOf("endblock") < 0)
+							// Push partial until block will end
 							while( !endblock && (tempLine = tokens[++tokenIndex]) !== undefined ) {
 								if(tempLine.indexOf("endblock") > -1) {
 									endblock = 1;
@@ -351,39 +370,28 @@
 									partial.push(tempLine);
 								}
 							}
-
-						// partial.pop();
-						// --tokenIndex;
+						}
 
 						partial = partial.join( CLOSE_TAG ) // + CLOSE_TAG
 						;
 
+						// Compile block as subtemplate and store it
 						var render = compileTemplateString(partial, key, true).replace(CODE_FIRST, "").replace(CODE_LAST,"");
 						_cachePartials[key] = render;
- 
-						if( DEBUG ) {
-							console.warn(">>>>>>", partial, " >>>>> ", render, " >>>>> ", key );
-						}
+						_cachePartialsIndex[key] = parsedLinesIndex;
 
-
+						// If current template is extended from another
+						// rewrite block cache
 						if( extended ){
 
-							for(var j = -1, l2 = parsedLinesIndex; ++j < l2;) {
-								if(parsedLines[j].operator === KEY_BLOCK){
-									if( DEBUG ) {
-										console.warn(parsedLines[j], _cacheParsing[parentID][j], parentID, name)
-									}
-									var testkey = key.replace(parentID, name);
-									if( testkey === key ) {
-										parsedLines[j]  = {
-											operator : KEY_BLOCK,
-											_code :  key
-										}
-									}
-								}
+							parsedLines[_cachePartialsIndex[key.replace(name,parentID)]] = {
+								operator : KEY_BLOCK,
+								_code :  key
 							}
 
 						} else {
+
+							// Otherwise
 							parsedLines[parsedLinesIndex++] = {
 								operator : KEY_BLOCK,
 								_code :  key
@@ -423,7 +431,7 @@
 							if( regexBackbone.test( code )) {
 								var m = _RegExp.$1, n = _RegExp.$2;
 								if( m && n ) {
-									code = "(_bb&&"+m+".cid?" + m + ".get('" + n + "'):" + code + ")";
+									code = "_bb&&"+m+".cid?" + m + ".get('" + n + "'):" + code;
 								}
 							}
 						}

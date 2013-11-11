@@ -27,7 +27,7 @@ test("escapes and filters", function(){
 	expect = "&lt;img src=&#x27;xxx.jpg?a=1&amp;b=2&#x27; alt=&quot;title&quot; &#x2F;&gt;";
 	tpl = testTPL2(
 		"escapeHTML-tpl",
-		"{{= data.str | escapeHTML}}"
+		"{{= data.str | escape}}"
 	)({
 		str : "<img src='xxx.jpg?a=1&b=2' alt=\"title\" />"
 	});
@@ -105,7 +105,7 @@ test("Backbone models", function(){
 		"{{= data.name }}, {{= data.age()}}"
 	)( model );
 	ok( expect == tpl, "Backbone passed");
-	
+
 });
 
 
