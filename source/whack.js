@@ -63,9 +63,6 @@
 		_cacheParsing = {},
 		_cachePartialsIndex = {};
 
-	// Code defaults
-	var CODE_FIRST = "var "+OUTPUT_VAR + "='';"
-		, CODE_LAST;
 
 
 	// if( EXPERIMENTAL_HAS_BACKBONE ){
@@ -75,14 +72,14 @@
 	// 	CODE_FIRST = "var "+OUTPUT_VAR + ";";
 	// }
 
-
 	// It is possible to use Whack in underscore's style
 	// E.g.  {a: 2} => a
 	if( USE_WITH ) {
-		CODE_FIRST = CODE_FIRST + "with(data){";
-		CODE_LAST  = "}return " + OUTPUT_VAR;
+		var CODE_FIRST = "var "+OUTPUT_VAR + "='';" + "with(data){";
+		var CODE_LAST  = "} return " + OUTPUT_VAR;
 	} else {
-		CODE_LAST  = "return " + OUTPUT_VAR;
+		var CODE_FIRST = "var "+OUTPUT_VAR + "='';";
+		var CODE_LAST  = "return " + OUTPUT_VAR;
 	}
 
 
@@ -430,13 +427,21 @@
 
 		}
 
-		if( SUPPORT_EXTENDS && !extended ) {
+		if( SUPPORT_EXTENDS ) {
+			if( !extended ) {
+				parsedLines[parsedLinesIndex++] = {
+					operator : KEY_JS,
+					_code : CODE_LAST
+				}
+				parsedLines.len = parsedLinesIndex;
+			} else {
+				parsedLines.len = parsedLinesIndex;
+			}
+		} else {
 			parsedLines[parsedLinesIndex++] = {
 				operator : KEY_JS,
 				_code : CODE_LAST
 			}
-			parsedLines.len = parsedLinesIndex;
-		} else {
 			parsedLines.len = parsedLinesIndex;
 		}
 

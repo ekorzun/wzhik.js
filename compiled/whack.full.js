@@ -1,7 +1,8 @@
 +function(v) {
+  var w, x;
   function E(a, d) {
     var e, f, g = a.split("}}"), k, l;
-    (l = M.test(g[0]) && r.$1) ? (w[d] = w[l], f = w[d], e = f.c, g.shift(), k = 1) : (e = 1, f = {0:{b:m, a:z}});
+    (l = M.test(g[0]) && r.$1) ? (y[d] = y[l], f = y[d], e = f.c, g.shift(), k = 1) : (e = 1, f = {0:{b:m, a:x}});
     for(var n = 0, h = g.length;n < h;n++) {
       var b = g[n].replace(/\\/g, "\\\\").split("{{");
       "" !== b[0] && (f[e++] = {b:"=", a:"'" + b[0].replace(/'/g, "\\'").replace(/\n/g, "\\n") + "'"});
@@ -16,8 +17,8 @@
               }
             }
             p = p.join("}}");
-            c = E(p, b).replace(z, "").replace(x, "");
-            y[b] = c;
+            c = E(p, b).replace(x, "").replace(w, "");
+            z[b] = c;
             F[b] = e;
             k ? f[F[b.replace(d, l)]] = {b:t, a:b} : f[e++] = {b:t, a:b}
           }else {
@@ -38,9 +39,9 @@
         }
       }
     }
-    k || (f[e++] = {b:m, a:x});
+    k || (f[e++] = {b:m, a:w});
     f.c = e;
-    e = w[d] = f;
+    e = y[d] = f;
     f = e.c;
     g = Array(f);
     k = 0;
@@ -51,7 +52,7 @@
         g[k++] = ";"
       }
       h = h.a;
-      l === m ? g[k++] = h : l === G ? (s = h[1] || "item", b = "i" + u, c = "l" + u, p = "a" + u, u++, g[k++] = "for(var " + b + "=0," + s + "," + p + "=" + h[0] + "," + c + "=" + p + ".length;" + b + "<" + c + ";" + b + "++){" + s + "=" + p + "[" + b + "]") : l === t ? g[k++] = y[h] : (h = "WhackFull.v(" + h + ")", "=" !== s ? g[k++] = "_o+=(" + h + ")" : g[k++] = "+(" + h + ")");
+      l === m ? g[k++] = h : l === G ? (s = h[1] || "item", b = "i" + u, c = "l" + u, p = "a" + u, u++, g[k++] = "for(var " + b + "=0," + s + "," + p + "=" + h[0] + "," + c + "=" + p + ".length;" + b + "<" + c + ";" + b + "++){" + s + "=" + p + "[" + b + "]") : l === t ? g[k++] = z[h] : (h = "WhackFull.v(" + h + ")", "=" !== s ? g[k++] = "_o+=(" + h + ")" : g[k++] = "+(" + h + ")");
       s = l
     }
     return g.join("")
@@ -67,8 +68,9 @@
     d && !C[d] && (C[d] = e);
     return f
   }
-  var u = 0, r = v.RegExp, m = 1, G = 2, t = 3, C = {}, B = {}, y = {}, w = {}, F = {}, z = "var _o='';", x;
-  x = "return _o";
+  var u = 0, r = v.RegExp, m = 1, G = 2, t = 3, C = {}, B = {}, z = {}, y = {}, F = {};
+  x = "var _o='';";
+  w = "return _o";
   var A = {end:function() {
     return{b:m, a:"}"}
   }, "else":function() {
@@ -84,14 +86,14 @@
     return{b:G, a:[a.$1, a.$2]}
   }, include:function(a) {
     a = H.test(a) && r.$1;
-    return{b:m, a:y[a] || (y[a] = C[a].replace(z, "").replace(x, ""))}
+    return{b:m, a:z[a] || (z[a] = C[a].replace(x, "").replace(w, ""))}
   }, block:function(a, d) {
     var e = H.test(a) && r.$1;
     return{b:t, a:d + ":" + e}
   }, endblock:function() {
     return{b:"=", a:"''"}
   }}, D = {}, I = v.chrome, J = v.document;
-  if(I) {
+  if(!I) {
     var K = J.createTextNode(""), L = J.createElement("span");
     L.appendChild(K)
   }
