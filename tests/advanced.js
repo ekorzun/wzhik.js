@@ -19,19 +19,21 @@ test("escapes and filters", function(){
 	ok(expect == tpl, "capitalize filter passed");
 
 
-	expect = "Korzhik";
-	tpl = testTPL("{{ var x =  'korzhik' }}{{= x | capitalize}}")();
-	ok(expect == tpl, "capitalize filter passed");
-
-
 	expect = "&lt;img src=&#x27;xxx.jpg?a=1&amp;b=2&#x27; alt=&quot;title&quot; &#x2F;&gt;";
 	tpl = testTPL2(
 		"escapeHTML-tpl",
-		"{{= data.str | escape}}"
+		"{{= data.str | escapeHTML}}"
 	)({
 		str : "<img src='xxx.jpg?a=1&b=2' alt=\"title\" />"
 	});
 	ok(expect == tpl, "escapeHTML filter passed");
+
+	Whack.addFilter("pow", function(val){
+		return Number(val) * 2
+	});
+	expect = "100";
+	tpl = testTPL("{{= 50 | pow}}")();
+	ok(expect == tpl, "dynamic filter passed");
 
 });
 
