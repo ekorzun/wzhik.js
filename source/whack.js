@@ -19,7 +19,7 @@
 /** @define {string} */		var OPEN_TAG = "{{";
 /** @define {string} */		var CLOSE_TAG = "}}";
 /** @define {string} */		var OPERATOR_ECHO = "=";
-/** @define {string} */		var OPERATOR_ESCAPED_ECHO = "~";
+/** @define {string} */		var OPERATOR_ESCAPED_ECHO = "-";
 /** @define {string} */		var OPERATOR_COMMENT = "!";
 /** @define {string} */		var OUTPUT_VAR = "_o";
 
@@ -53,7 +53,8 @@
 		KEY_FOR = 2,
 		KEY_BLOCK = 3,
 		KEY_FILTER = 4,
-		KEY_ECHO = 5;
+		KEY_ECHO = 5,
+		KEY_ESCAPE = 6;
 
 	// Cache indexes
 	var _cacheCompiled = {},
@@ -63,26 +64,28 @@
 		_cachePartialsIndex = {};
 
 	// Code defaults
-	var CODE_FIRST, CODE_LAST;
+	var CODE_FIRST = "var "+OUTPUT_VAR + "='';"
+		, CODE_LAST;
 
 
-	if( EXPERIMENTAL_HAS_BACKBONE ){
-		var regexBackbone = /(\w+)\.([\w_]+)(?!\(.*\))/g;
-		CODE_FIRST = "var "+OUTPUT_VAR+",_bb=data&&!!data.cid;"
-	} else {
-		CODE_FIRST = "var "+OUTPUT_VAR + ";";
-
-	}
+	// if( EXPERIMENTAL_HAS_BACKBONE ){
+	// 	var regexBackbone = /(\w+)\.([\w_]+)(?!\(.*\))/g;
+	// 	CODE_FIRST = "var "+OUTPUT_VAR+",_bb=data&&!!data.cid;"
+	// } else {
+	// 	CODE_FIRST = "var "+OUTPUT_VAR + ";";
+	// }
 
 
 	// It is possible to use Whack in underscore's style
 	// E.g.  {a: 2} => a
 	if( USE_WITH ) {
 		CODE_FIRST = CODE_FIRST + "with(data){";
-		var CODE_LAST  = "}return " + OUTPUT_VAR;
+		CODE_LAST  = "}return " + OUTPUT_VAR;
 	} else {
-		var CODE_LAST  = "return " + OUTPUT_VAR;
+		CODE_LAST  = "return " + OUTPUT_VAR;
 	}
+
+
 
 
 
@@ -208,7 +211,7 @@
 			t2	= /</g,
 			sl 	= /\//g;
 
-		_filters["escapeHTML"] = function( code, name ) {
+		_filters["escapeHTML"] = function( code ) {
 			return isChrome
 				? code
 					.replace(amp, '&amp;')
@@ -387,6 +390,11 @@
 
 						continue;
 
+					} else if( symbol === OPERATOR_ESCAPED_ECHO) {
+
+						operator = OPERATOR_ECHO;
+						code = WHACK_NAME + ".e" + "(" + code.substring(1) + ")";
+
 					} else {
 
 						if(symbol === OPERATOR_ECHO ) {
@@ -427,6 +435,8 @@
 				operator : KEY_JS,
 				_code : CODE_LAST
 			}
+			parsedLines.len = parsedLinesIndex;
+		} else {
 			parsedLines.len = parsedLinesIndex;
 		}
 
@@ -494,6 +504,13 @@
 			lastOperator = operator;
 		}
 
+
+		if( DEBUG ) {
+			compiledLines[0] = "try{" + compiledLines[0];
+			compiledLines[compiledLinesIndex-1] = (USE_WITH ? "}" : "") + "}catch(e){console.error(e.message);};" + "return " + OUTPUT_VAR;
+			console.log("Compiled function: ", compiledLines.join(""));
+		}
+
 		return compiledLines.join('');
 	}
 
@@ -531,7 +548,6 @@
 		var compiled = compileTemplateString(templateString, templateID);
 
 		if( DEBUG ) {
-			console.log("Compiled function: ", compiled);
 			console.groupEnd("tpl: " + templateID);
 		}
 
@@ -547,26 +563,24 @@
 		return fn;
     }
 
-    if( IGNORE_NULLS || EXPERIMENTAL_HAS_BACKBONE ) {
+    if( IGNORE_NULLS ) {
     	buildTemplate['v'] = function( o ){
-    		if( typeof o === "number" ) return o;
-    		if(!o) return "";
-    		return o;
+    		return (typeof o === "number" || o) ? o : "";
     	}
     }
 
-    if(SUPPORT_FILTERS) {
+    if( SUPPORT_FILTERS ) {
     	buildTemplate['f'] = _filters;
+    	buildTemplate['addFilter'] = function(name, fn){
+    		_filters[name] = fn;
+    	}
     }
 
 
-    if(EXTENDABLE_API) {
-    	if( SUPPORT_FILTERS ) {
-	    	buildTemplate['addFilter'] = function(name, fn){
-	    		_filters[name] = fn;
-	    	}
-	    }
-    }
+    buildTemplate['e'] = function(code){
+    	return buildTemplate['f']['escapeHTML']( code );
+	}
+	
 
 
     _window[WHACK_NAME] = buildTemplate;
