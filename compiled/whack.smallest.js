@@ -1,23 +1,22 @@
 +function(n) {
-  function f(a, d) {
-    "#" === a.charAt(0) && (d = a, a = document.getElementById(a.substr(1)).innerHTML);
-    !d && (d = "t" + r++);
-    console.group("tpl: " + d);
+  function d(a, f) {
+    "#" === a.charAt(0) && (f = a, a = document.getElementById(a.substr(1)).innerHTML);
+    !f && (f = "t" + r++);
     if(t[a]) {
       return t[a]
     }
     var g, h;
-    h = d;
-    var m, e, k = a.split("%>");
-    m = 1;
+    h = f;
+    var l, e, m = a.split("%>");
+    l = 1;
     e = {0:{b:p, a:B}};
-    for(var l = 0, f = k.length;l < f;l++) {
-      var b = k[l].replace(/\\/g, "\\\\").split("<%");
-      "" !== b[0] && (e[m++] = {b:"=", a:"'" + b[0].replace(/'/g, "\\'").replace(/\n/g, "\\n") + "'"});
+    for(var k = 0, d = m.length;k < d;k++) {
+      var b = m[k].replace(/\\/g, "\\\\").split("<%");
+      "" !== b[0] && (e[l++] = {b:"=", a:"'" + b[0].replace(/'/g, "\\'").replace(/\n/g, "\\n") + "'"});
       if(b = b[1]) {
         var c = C.test(b) && s.$1;
         if(c) {
-          b = u[c](b, h), e[m++] = b
+          b = u[c](b, h), e[l++] = b
         }else {
           c = b.charAt(0);
           if(" " === c) {
@@ -29,44 +28,39 @@
               "-" === c ? (c = "=", b = "WhackSmallest.e(" + b.substring(1) + ")") : ("=" === c && (b = b.substring(1)), /\|\s(\w+)/.test(b) && (c = s.$1, b = b.replace("| " + c, ""), b = "WhackSmallest.f." + c + "(" + b + ")"), c = "=")
             }
           }
-          c && (e[m++] = {b:c, a:b})
+          c && (e[l++] = {b:c, a:b})
         }
       }
     }
-    e.c = m;
-    console.log("Parsed lines: ", e);
+    e.c = l;
     h = D[h] = e;
-    m = h.c;
-    e = Array(m);
-    for(f = k = 0;f < m;f++) {
-      b = h[f];
-      l = b.b;
-      if(g !== l || l === p) {
-        e[k++] = ";"
+    l = h.c;
+    e = Array(l);
+    for(d = m = 0;d < l;d++) {
+      b = h[d];
+      k = b.b;
+      if(g !== k || k === p) {
+        e[m++] = ";"
       }
       b = b.a;
-      if(l === p) {
-        e[k++] = b
+      if(k === p) {
+        e[m++] = b
       }else {
-        if(l === v) {
+        if(k === v) {
           g = b[1] || "item";
           var c = "i" + r, n = "l" + r, q = "a" + r;
           r++;
-          e[k++] = "for(var " + c + "=0," + g + "," + q + "=" + b[0] + "," + n + "=" + q + ".length;" + c + "<" + n + ";" + c + "++){" + g + "=" + q + "[" + c + "]"
+          e[m++] = "for(var " + c + "=0," + g + "," + q + "=" + b[0] + "," + n + "=" + q + ".length;" + c + "<" + n + ";" + c + "++){" + g + "=" + q + "[" + c + "]"
         }else {
-          "=" !== g ? e[k++] = "_o+=(" + b + ")" : e[k++] = "+(" + b + ")"
+          "=" !== g ? e[m++] = "_o+=(" + b + ")" : e[m++] = "+(" + b + ")"
         }
       }
-      g = l
+      g = k
     }
-    e[0] = "try{" + e[0];
-    e[k - 1] = "}catch(e){console.error(e.message);};return _o";
-    console.log("Compiled function: ", e.join(""));
     g = e.join("");
-    console.groupEnd("tpl: " + d);
     h = new Function("data", g);
     t[a] = h;
-    d && !w[d] && (w[d] = g);
+    f && !w[f] && (w[f] = g);
     return h
   }
   var r = 0, s = n.RegExp, p = 1, v = 2, w = {}, t = {}, D = {}, B = "var _o='';", u = {end:function() {
@@ -76,13 +70,12 @@
   }, elseif:function(a) {
     return u["if"]("} else " + a)
   }, "if":function(a) {
-    var d = a.lastIndexOf(":"), f = "" === a.split(":").slice(-1)[0].trim();
-    -1 < d && f ? a = a.substr(0, d) + "{" : -1 === d && "" === a.split(")").slice(-1)[0].trim() && (a += "{");
+    var f = a.lastIndexOf(":"), d = "" === a.split(":").slice(-1)[0].trim();
+    -1 < f && d ? a = a.substr(0, f) + "{" : -1 === f && "" === a.split(")").slice(-1)[0].trim() && (a += "{");
     return{b:p, a:a}
   }, each:function(a) {
-    var d = E.test(a) && s;
-    console.log("Parsing <for>: ", a, d);
-    return{b:v, a:[d.$1, d.$2]}
+    a = E.test(a) && s;
+    return{b:v, a:[a.$1, a.$2]}
   }}, q = {}, x = n.chrome, y = n.document;
   if(x) {
     var z = y.createTextNode(""), A = y.createElement("span");
@@ -93,13 +86,13 @@
     return x ? a.replace(F, "&amp;").replace(J, "&lt;").replace(I, "&gt;").replace(G, "&quot;").replace(H, "&#x27;").replace(K, "&#x2F;") : (z.nodeValue = a) && A.innerHTML
   };
   var E = /\(([\w\.\_]+),?\s*(\w+)?\)/, C = new s("^\\s*(" + Object.keys(u).join("|") + ")\\b");
-  f.f = q;
-  f.addFilter = function(a, d) {
+  d.f = q;
+  d.addFilter = function(a, d) {
     q[a] = d
   };
-  f.e = function(a) {
-    return f.f.escapeHTML(a)
+  d.e = function(a) {
+    return d.f.escapeHTML(a)
   };
-  n.WhackSmallest = f
+  n.WhackSmallest = d
 }(this);
 
