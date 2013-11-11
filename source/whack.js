@@ -40,7 +40,6 @@
 /** @define {boolean} */	var SUPPORT_FILTER_ABS  = true;
 /** @define {boolean} */	var SUPPORT_FILTER_CAPITALIZE  = true;
 
-// test
 
 
 
