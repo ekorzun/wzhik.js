@@ -40,6 +40,8 @@
 /** @define {boolean} */	var SUPPORT_FILTER_ABS  = true;
 /** @define {boolean} */	var SUPPORT_FILTER_CAPITALIZE  = true;
 
+// test
+
 
 
 
@@ -156,7 +158,7 @@
 
 
 	if( SUPPORT_EXTENDS ) {
-		
+
 		parsemap["block"] = function( code, name )  {
 			var blockname = regexOP.test(code) && _RegExp.$1,
 				key = name + ":" + blockname
@@ -204,7 +206,7 @@
 			DOMelement.appendChild( DOMtext );
 		}
 
-		var 
+		var
 			amp = /&/g,
 			q1 	= /"/g,
 			q2	= /'/g,
@@ -249,8 +251,8 @@
 		}
 
 	}
-	
-	
+
+
 	// Precompiled regex
 	// http://jsperf.com/regexp-test-search-vs-indexof/27
 	var regexFOR	= /\(([\w\.\_]+),?\s*(\w+)?\)/,
@@ -259,21 +261,21 @@
 		regexPARSE 	= new _RegExp("^\\s*(" + Object.keys(parsemap).join("|") + ")\\b");
 
 
-	// 
-	// 
-	// 
+	//
+	//
+	//
 	function parse( templateString, name){
 
 		var parsedLinesIndex;
 		var parsedLines;
 		var tokens = templateString.split( CLOSE_TAG );
-		
+
 		var extended;
 		var parentID;
 
 		// If Whack supports extend, it should be in the first line
 		if( SUPPORT_EXTENDS && (parentID = regexEXTEND.test(tokens[0]) && _RegExp.$1)) {
-			
+
 			// In autocompile mode make sure that parentID is exist
 			if(AUTOCOMPILE && !_cacheParsing[parentID]){
 				// Try to compile parent from DOM useing ID selector
@@ -316,14 +318,14 @@
 				}
 			}
 		}
-		
+
 		// Start parsing tokens
 		for(var tokenIndex = 0, tokensLength = tokens.length; tokenIndex < tokensLength; tokenIndex++){
 
 			// Make sure that code doesnt contains slashes
 			var line = tokens[tokenIndex].replace(/\\/g,'\\\\');
 			var l = line.split( OPEN_TAG );
-			
+
 			// Code may start with plain text
 			if( l[0] !== ''){
 				parsedLines[parsedLinesIndex++] = {
@@ -331,14 +333,14 @@
 					_code :'\''+l[0].replace(/'/g,'\\\'').replace(/\n/g,'\\n')+'\''
 				};
 			}
-			
+
 			var code = l[1];
 			if( code ){
-				
+
 				// Check any custom operator (include / for / if  etc)
 				var operator = regexPARSE.test(code) && _RegExp.$1;
 				if( operator ) {
-					
+
 					// Execute it
 					code = parsemap[operator]( code, name );
 
@@ -401,10 +403,10 @@
 					} else {
 						parsedLines[parsedLinesIndex++] = code;
 					}
-					
+
 
 				} else {
-					
+
 					var symbol = code.charAt(0);
 					var operator;
 
@@ -416,7 +418,7 @@
 						continue;
 
 					} else {
-						
+
 						if(symbol === OPERATOR_ECHO ) {
 							code = code.substring(1);
 						}
@@ -474,30 +476,30 @@
 		var lastOperator,line, operator;
 
 		for(var i=0,l=parsedLinesIndex;i<l;i++){
-			
+
 			line = parsedLines[i];
 			operator = line.operator;
-			
+
 			if( lastOperator !== operator || operator === KEY_JS)
 				compiledLines[compiledLinesIndex++] = ';';
 
 			var v = line._code;
 
 			if(operator === KEY_JS){
-				
+
 				compiledLines[compiledLinesIndex++] = v;
 
 			} else if(operator === KEY_FOR){
-				
+
 				var item = v[1] || "item",
 					iter = "i" + tplHash,
 					len  = "l" + tplHash,
 					arr  = "a" + tplHash;
 
 				tplHash++;
-				
+
 				compiledLines[compiledLinesIndex++] = (
-					'for(var '+ iter + '=0,' + item + ',' + arr + '=' + v[0] + ',' + len + '=' + arr + '.length;' + 
+					'for(var '+ iter + '=0,' + item + ',' + arr + '=' + v[0] + ',' + len + '=' + arr + '.length;' +
 						iter + '<' + len + ';' + iter + '++){' + item + '=' + arr + '[' + iter + ']'
 				);
 
@@ -514,19 +516,19 @@
 			}
 			lastOperator = operator;
 		}
-		
+
 		return compiledLines.join('');
 	}
 
 
 
 
-	// 
-	// 
-	// 	
+	//
+	//
+	//
 	function buildTemplate(templateString, templateID){
 
-		
+
 
 		if(templateString.charAt(0) === "#"){
 			templateID = templateString;
@@ -542,10 +544,10 @@
 		if( DEBUG ) {
 			console.group( "tpl: " + templateID );
 		}
-		
+
 		// if(templateID && _cacheCompiled[templateID])
 		// 	return _cacheCompiled[templateID];
-		
+
 		if(_cacheCompiledByTpl[templateString])
 			return _cacheCompiledByTpl[templateString];
 
@@ -564,7 +566,7 @@
 			// _cacheCompiled[templateID] = fn;
 			_cacheCompiled[templateID] = compiled;
 		}
-		
+
 		return fn;
     }
 
@@ -573,7 +575,7 @@
     	buildTemplate['f'] = _filters;
     }
 
-    
+
 
     _window[WHACK_NAME] = buildTemplate;
 
