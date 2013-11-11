@@ -7,13 +7,10 @@
 // ------------------------------------------------------------------------------------------------
 /** @define {boolean} */	var DEBUG = true;
 /** @define {string} */		var WHACK_NAME = "Whack";
-/** @define {boolean} */	var AUTOCOMPILE = true;
+/** @define {boolean} */	var AUTOCOMPILE = false;
 /** @define {boolean} */	var EXTENDABLE_API = true;
+/** @define {boolean} */	var IGNORE_NULLS = true;
 
-// COMPATIBILITY FLAGS
-// ------------------------------------------------------------------------------------------------
-/** @define {boolean} */	var HAS_JQUERY = true;
-/** @define {boolean} */	var HAS_BACKBONE = true;
 
 
 // SYNTAX OPTS
@@ -34,13 +31,10 @@
 /** @define {boolean} */	var SUPPORT_PARTIALS = true;
 /** @define {boolean} */	var SUPPORT_FILTERS = true;
 
-// FILTERS OPTS
+// EXPERIMENTAL OPTS
 // ------------------------------------------------------------------------------------------------
-/** @define {boolean} */	var SUPPORT_FILTER_TRIM = true;
-/** @define {boolean} */	var SUPPORT_FILTER_ABS  = true;
-/** @define {boolean} */	var SUPPORT_FILTER_CAPITALIZE  = true;
-
-
+/** @define {boolean} */	var EXPERIMENTAL_HAS_JQUERY = false;
+/** @define {boolean} */	var EXPERIMENTAL_HAS_BACKBONE = false;
 
 
 +function(_window){
@@ -71,8 +65,8 @@
 	var CODE_FIRST, CODE_LAST;
 	CODE_FIRST = "var "+OUTPUT_VAR+"=''";
 
-	if( HAS_BACKBONE ){
-		var regexBackbone = /(\w+)\.([\w_]+)/g;
+	if( EXPERIMENTAL_HAS_BACKBONE ){
+		var regexBackbone = /(\w+)\.([\w_]+)(?!\(.*\))/g;
 		CODE_FIRST = CODE_FIRST + ",_bb=data&&!!data.cid;"
 	} else {
 		CODE_FIRST = CODE_FIRST + ";";
@@ -212,7 +206,7 @@
 			t2	= /</g,
 			sl 	= /\//g;
 
-		_filters["escape"] = function( code, name ) {
+		_filters["escapeHTML"] = function( code, name ) {
 			return isChrome
 				? code
 					.replace(amp, '&amp;')
@@ -222,30 +216,6 @@
 					.replace(q2, '&#x27;')
 					.replace(sl,'&#x2F;')
 				: (DOMtext.nodeValue = code) && DOMelement.innerHTML;
-		}
-
-		if( SUPPORT_FILTER_TRIM ) {
-			if( HAS_JQUERY ) {
-				_filters["trim"] = $['trim'];
-			} else {
-				_filters["trim"] = function( code ) {
-					return $.trim( code );
-				}
-			}
-		}
-
-
-		if( SUPPORT_FILTER_ABS ) {
-			_filters["abs"] = function( code ){
-				return Math.abs(Number(code));
-			}
-		}
-
-
-		if( SUPPORT_FILTER_CAPITALIZE ) {
-			_filters["capitalize"] = function( code ){
-				return code.charAt(0).toUpperCase()+code.substr(1);
-			}
 		}
 
 	}
@@ -424,10 +394,12 @@
 						if( SUPPORT_FILTERS && /\|\s(\w+)/.test(code)){
 							var f = _RegExp.$1;
 							code = code.replace("| " + f, "");
+							var __code = code;
 							code = WHACK_NAME + ".f." + f + "(" + code + ")";
 						}
 
-						if( HAS_BACKBONE ) {
+						// @todo Backbone doesnt work with filters
+						if( EXPERIMENTAL_HAS_BACKBONE ) {
 							if( regexBackbone.test( code )) {
 								var m = _RegExp.$1, n = _RegExp.$2;
 								if( m && n ) {
@@ -506,6 +478,11 @@
 				compiledLines[compiledLinesIndex++] = _cachePartials[v];
 
 			} else {
+
+				if( IGNORE_NULLS ) {
+					v = WHACK_NAME + ".v("+v+")";
+				}
+
 				if(lastOperator !== OPERATOR_ECHO){
 					compiledLines[compiledLinesIndex++] = (OUTPUT_VAR + '+=') + '(' + v + ')';
 				} else {
@@ -530,7 +507,7 @@
 
 		if(templateString.charAt(0) === "#"){
 			templateID = templateString;
-			if(HAS_JQUERY) {
+			if( EXPERIMENTAL_HAS_JQUERY) {
 				templateString = $(templateString).html();
 			} else {
 				templateString = document.getElementById(templateString.substr(1)).innerHTML;
@@ -568,9 +545,25 @@
 		return fn;
     }
 
+    if( IGNORE_NULLS || EXPERIMENTAL_HAS_BACKBONE ) {
+    	buildTemplate['v'] = function( o ){
+    		if( typeof o === "number" ) return o;
+    		if(!o) return "";
+    		return o;
+    	}
+    }
 
     if(SUPPORT_FILTERS) {
     	buildTemplate['f'] = _filters;
+    }
+
+
+    if(EXTENDABLE_API) {
+    	if( SUPPORT_FILTERS ) {
+	    	buildTemplate['addFilter'] = function(name, fn){
+	    		_filters[name] = fn;
+	    	}
+	    }
     }
 
     
