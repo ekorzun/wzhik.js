@@ -560,7 +560,6 @@
     }
 
 
-<<<<<<< HEAD
     if(EXTENDABLE_API) {
     	if( SUPPORT_FILTERS ) {
 	    	buildTemplate['addFilter'] = function(name, fn){
@@ -569,9 +568,6 @@
 	    }
     }
 
-    
-=======
->>>>>>> 82cd7495d0507e159139d1870da7d243e6ea1b52
 
     _window[WHACK_NAME] = buildTemplate;
 
