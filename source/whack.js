@@ -1,6 +1,4 @@
-// http://jsperf.com/string-concat-vs-array-join-10000/8
-// http://jsperf.com/advance-templates-benchmark/3
-// http://jsperf.com/js-template-engines-performance/26
+
 
 
 // COMPILATION FLAGS
@@ -75,13 +73,17 @@
 	// It is possible to use Whack in underscore's style
 	// E.g.  {a: 2} => a
 	if( USE_WITH ) {
-		var CODE_FIRST = "var "+OUTPUT_VAR + "='';" + "with(data){";
+		var CODE_FIRST = "var "+OUTPUT_VAR + "=" + (DEBUG ? "[]" : "''") + ";" + "with(data){";
 		var CODE_LAST  = "} return " + OUTPUT_VAR;
 	} else {
-		var CODE_FIRST = "var "+OUTPUT_VAR + "='';";
+		var CODE_FIRST = "var "+OUTPUT_VAR + "=" + (DEBUG ? "[]" : "''") + ";";
 		var CODE_LAST  = "return " + OUTPUT_VAR;
 	}
 
+	if( DEBUG ) {
+		CODE_FIRST = "try{" + CODE_FIRST;
+		CODE_LAST = (USE_WITH ? "}" : "") + "}catch(e){console.error(e.message);};" + "return " + OUTPUT_VAR + (DEBUG ? ".join('')" : "");
+	}
 
 
 
@@ -90,8 +92,8 @@
 		var parsemap = {
 
 			"end" : function(){return {operator: KEY_JS, _code: '}'}},
-			"else" : function(){return {operator: KEY_JS, _code: '} else {'}},
-			"elseif" : function( code ){return parsemap["if"]("} else " + code)},
+			"else" : function(){return {operator: KEY_JS, _code: '}else{'}},
+			"elseif" : function( code ){return parsemap["if"]("}else" + code)},
 
 			"if" : function(code){
 				var p = code.lastIndexOf(':');
@@ -106,11 +108,12 @@
 					_code : code
 				};
 			},
+
 			"each" : function(code){
 				var vals = regexFOR.test(code) && _RegExp;
-				if( DEBUG ) {
-					console.log("Parsing <for>: ", code, vals);
-				}
+				// if( DEBUG ) {
+				// 	console.log("Parsing <for>: ", code, vals);
+				// }
 				return {
 					operator : KEY_FOR,
 					_code : [vals.$1, vals.$2]
@@ -124,6 +127,7 @@
 
 	if( SUPPORT_PARTIALS ) {
 		parsemap["include"] = function(code) {
+
 			var r = regexOP.test(code) && _RegExp.$1;
 
 			if(AUTOCOMPILE && !_cacheCompiled[r]){
@@ -143,6 +147,7 @@
 					};
 				}
 			}
+
 			return {
 				operator : KEY_JS,
 				_code : _cachePartials[r] || (_cachePartials[r] = _cacheCompiled[r].replace(CODE_FIRST, "").replace(CODE_LAST, ""))
@@ -157,9 +162,9 @@
 			var blockname = regexOP.test(code) && _RegExp.$1,
 				key = name + ":" + blockname
 
-			if( DEBUG ) {
-				console.log("Parsing <block>", key, code);
-			}
+			// if( DEBUG ) {
+			// 	console.log("Parsing <block>", key, code);
+			// }
 
 			return {
 				operator : KEY_BLOCK,
@@ -188,7 +193,7 @@
 	}
 
 
-	if(SUPPORT_FILTERS) {
+	if( SUPPORT_FILTERS ) {
 
 		var _filters = {},
 			isChrome = _window['chrome'],
@@ -277,6 +282,7 @@
 			if( DEBUG ) {
 				console.log("Extending: ", name, 'extends', parentID);
 			}
+
 		} else {
 
 			// Whack doesnt support extending, so we use default code
@@ -406,14 +412,14 @@
 						}
 
 						// @todo Backbone doesnt work with filters
-						if( EXPERIMENTAL_HAS_BACKBONE ) {
-							if( regexBackbone.test( code )) {
-								var m = _RegExp.$1, n = _RegExp.$2;
-								if( m && n ) {
-									code = "_bb&&"+m+".cid?" + m + ".get('" + n + "'):" + code;
-								}
-							}
-						}
+						// if( EXPERIMENTAL_HAS_BACKBONE ) {
+						// 	if( regexBackbone.test( code )) {
+						// 		var m = _RegExp.$1, n = _RegExp.$2;
+						// 		if( m && n ) {
+						// 			code = "_bb&&"+m+".cid?" + m + ".get('" + n + "'):" + code;
+						// 		}
+						// 	}
+						// }
 
 						operator = OPERATOR_ECHO;
 					}
@@ -445,9 +451,9 @@
 			parsedLines.len = parsedLinesIndex;
 		}
 
-		if( DEBUG ) {
-			console.log("Parsed lines: ", parsedLines)
-		}
+		// if( DEBUG ) {
+		// 	console.log("Parsed lines: ", parsedLines)
+		// }
 
 		return (_cacheParsing[name] = parsedLines);
 	}
@@ -462,7 +468,7 @@
 		var compiledLinesIndex = 0;
 		var lastOperator,line, operator;
 
-		for(var i=0,l=parsedLinesIndex;i<l;i++){
+		for(var i = 0, l = parsedLinesIndex; i < l; i++ ){
 
 			line = parsedLines[i];
 			operator = line.operator;
@@ -497,13 +503,26 @@
 			} else {
 
 				if( IGNORE_NULLS ) {
-					v = WHACK_NAME + ".v("+v+")";
+
+					v = WHACK_NAME + ".v(" 
+						+ v 
+						+ (DEBUG ? ((v || "").charAt(0) === "'" ? ("," + v) : (",'"+line._code+"'")):"") 
+						+ (DEBUG ? ((name || "").charAt(0) === "'" ? "''" : (',"'+name+'"')) :"") 
+						+ (DEBUG ? (","+compiledLinesIndex):"")
+					+ ")";
 				}
 
-				if(lastOperator !== OPERATOR_ECHO){
-					compiledLines[compiledLinesIndex++] = (OUTPUT_VAR + '+=') + '(' + v + ')';
+				if( DEBUG ) {
+					
+					compiledLines[compiledLinesIndex++] = OUTPUT_VAR + '.push(' + v + ');';
+
 				} else {
-					compiledLines[compiledLinesIndex++] = '+(' + v + ')'
+
+					if(lastOperator !== OPERATOR_ECHO){
+						compiledLines[compiledLinesIndex++] = (OUTPUT_VAR + '+=') + '(' + v + ')';
+					} else {
+						compiledLines[compiledLinesIndex++] = '+(' + v + ')'
+					}
 				}
 			}
 			lastOperator = operator;
@@ -511,12 +530,14 @@
 
 
 		if( DEBUG ) {
-			compiledLines[0] = "try{" + compiledLines[0];
-			compiledLines[compiledLinesIndex-1] = (USE_WITH ? "}" : "") + "}catch(e){console.error(e.message);};" + "return " + OUTPUT_VAR;
-			console.log("Compiled function: ", compiledLines.join(""));
-		}
 
-		return compiledLines.join('');
+			var compiled = compiledLines.join('');
+			console.log("Compiled function: ", js_beautify(compiled));
+			return compiled;
+			
+		} else {
+			return compiledLines.join('');
+		}
 	}
 
 
@@ -526,8 +547,6 @@
 	//
 	//
 	function buildTemplate(templateString, templateID){
-
-
 
 		if(templateString.charAt(0) === "#"){
 			templateID = templateString;
@@ -568,9 +587,17 @@
 		return fn;
     }
 
+
     if( IGNORE_NULLS ) {
-    	buildTemplate['v'] = function( o ){
-    		return (typeof o === "number" || o) ? o : "";
+    	buildTemplate['v'] = function( o, variable, templateID, lineNumber ){
+    		if( DEBUG ) {
+    			if( o === undefined ) {
+    				console.warn("Undefined value: ", variable, '===', o, "in template", "#" +templateID, "at line", lineNumber);
+    			}
+    			return (typeof o === "number" || o) ? o : "";
+    		} else {
+    			return (typeof o === "number" || o) ? o : "";
+    		}
     	}
     }
 
@@ -587,7 +614,20 @@
 	}
 	
 
-
     _window[WHACK_NAME] = buildTemplate;
+
+
+    // For tests usage only
+    _window[WHACK_NAME]['_name'] = WHACK_NAME;
+
+
+    if( DEBUG ) {
+
+		var js = document.createElement('script');
+		js.setAttribute('type', 'text/javascript');
+		js.setAttribute('src', "http://jsbeautifier.org/js/lib/beautify.js");
+		document.getElementsByTagName('HEAD')[0].appendChild(js);
+
+    }
 
 }( this );
