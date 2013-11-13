@@ -1,6 +1,10 @@
 
 
 
+
+
+
+
 // COMPILATION FLAGS
 // ------------------------------------------------------------------------------------------------
 /** @define {boolean} */	var DEBUG = true;
@@ -534,7 +538,7 @@
 			var compiled = compiledLines.join('');
 			console.log("Compiled function: ", js_beautify(compiled));
 			return compiled;
-			
+
 		} else {
 			return compiledLines.join('');
 		}
@@ -627,6 +631,17 @@
 		js.setAttribute('type', 'text/javascript');
 		js.setAttribute('src', "http://jsbeautifier.org/js/lib/beautify.js");
 		document.getElementsByTagName('HEAD')[0].appendChild(js);
+
+
+		if(!_window['console']) {
+			_window['console'] = {
+				'log' : function(){},
+				'group' : function(){},
+				'groupEnd' : function(){},
+				'warn' : function(){},
+				'error': function(){}
+			};
+		}
 
     }
 

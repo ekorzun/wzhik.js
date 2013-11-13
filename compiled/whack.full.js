@@ -92,7 +92,15 @@
     return{b:u, a:d + ":" + e}
   }, endblock:function() {
     return{b:"=", a:"''"}
-  }}, D = {}, I = t.chrome, J = t.document;
+  }};
+  Object.keys || (Object.keys = function(a) {
+    var d = [], e;
+    for(e in a) {
+      a.hasOwnProperty(e) && d.push(e)
+    }
+    return d
+  });
+  var D = {}, I = t.chrome, J = t.document;
   if(!I) {
     var K = J.createTextNode(""), L = J.createElement("span");
     L.appendChild(K)
