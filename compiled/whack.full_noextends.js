@@ -1,4 +1,4 @@
-+function(p) {
++function(n) {
   var t, u;
   function d(a, f) {
     "#" === a.charAt(0) && (f = a, a = document.getElementById(a.substr(1)).innerHTML);
@@ -8,11 +8,11 @@
     }
     var g, h;
     h = f;
-    var k, e, n = a.split("}}");
+    var k, e, p = a.split("}}");
     k = 1;
     e = {0:{b:l, a:u}};
-    for(var m = 0, d = n.length;m < d;m++) {
-      var b = n[m].replace(/\\/g, "\\\\").split("{{");
+    for(var m = 0, d = p.length;m < d;m++) {
+      var b = p[m].replace(/\\/g, "\\\\").split("{{");
       "" !== b[0] && (e[k++] = {b:"=", a:"'" + b[0].replace(/'/g, "\\'").replace(/\n/g, "\\n") + "'"});
       if(b = b[1]) {
         var c = E.test(b) && s.$1;
@@ -38,23 +38,23 @@
     h = F[h] = e;
     k = h.c;
     e = Array(k);
-    for(d = n = 0;d < k;d++) {
+    for(d = p = 0;d < k;d++) {
       b = h[d];
       m = b.b;
       if(g !== m || m === l) {
-        e[n++] = ";"
+        e[p++] = ";"
       }
       b = b.a;
       if(m === l) {
-        e[n++] = b
+        e[p++] = b
       }else {
         if(m === y) {
           g = b[1] || "item";
-          var c = "i" + r, p = "l" + r, q = "a" + r;
+          var c = "i" + r, n = "l" + r, q = "a" + r;
           r++;
-          e[n++] = "for(var " + c + "=0," + g + "," + q + "=" + b[0] + "," + p + "=" + q + ".length;" + c + "<" + p + ";" + c + "++){" + g + "=" + q + "[" + c + "]"
+          e[p++] = "for(var " + c + "=0," + g + "," + q + "=" + b[0] + "," + n + "=" + q + ".length;" + c + "<" + n + ";" + c + "++){" + g + "=" + q + "[" + c + "]"
         }else {
-          "=" !== g ? e[n++] = "_o+=(" + b + ")" : e[n++] = "+(" + b + ")"
+          b = "WhackNoExtends.v(" + b + ")", "=" !== g ? e[p++] = "_o+=(" + b + ")" : e[p++] = "+(" + b + ")"
         }
       }
       g = m
@@ -65,15 +65,15 @@
     f && !x[f] && (x[f] = g);
     return h
   }
-  var r = 0, s = p.RegExp, l = 1, y = 2, x = {}, v = {}, z = {}, F = {};
+  var r = 0, s = n.RegExp, l = 1, y = 2, x = {}, v = {}, z = {}, F = {};
   u = "var _o='';";
   t = "return _o";
   var w = {end:function() {
     return{b:l, a:"}"}
   }, "else":function() {
-    return{b:l, a:"} else {"}
+    return{b:l, a:"}else{"}
   }, elseif:function(a) {
-    return w["if"]("} else " + a)
+    return w["if"]("}else" + a)
   }, "if":function(a) {
     var f = a.lastIndexOf(":"), d = "" === a.split(":").slice(-1)[0].trim();
     -1 < f && d ? a = a.substr(0, f) + "{" : -1 === f && "" === a.split(")").slice(-1)[0].trim() && (a += "{");
@@ -84,7 +84,7 @@
   }, include:function(a) {
     a = H.test(a) && s.$1;
     return{b:l, a:z[a] || (z[a] = x[a].replace(u, "").replace(t, ""))}
-  }}, q = {}, A = p.chrome, B = p.document;
+  }}, q = {}, A = n.chrome, B = n.document;
   if(!A) {
     var C = B.createTextNode(""), D = B.createElement("span");
     D.appendChild(C)
@@ -94,6 +94,9 @@
     return A ? a.replace(I, "&amp;").replace(M, "&lt;").replace(L, "&gt;").replace(J, "&quot;").replace(K, "&#x27;").replace(N, "&#x2F;") : (C.nodeValue = a) && D.innerHTML
   };
   var G = /\(([\w\.\_]+),?\s*(\w+)?\)/, H = /([\w\-#_]+)\s?$/, E = new s("^\\s*(" + Object.keys(w).join("|") + ")\\b");
+  d.v = function(a) {
+    return"number" === typeof a || a ? a : ""
+  };
   d.f = q;
   d.addFilter = function(a, d) {
     q[a] = d
@@ -101,6 +104,7 @@
   d.e = function(a) {
     return d.f.escapeHTML(a)
   };
-  p.WhackNoExtends = d
+  n.WhackNoExtends = d;
+  n.WhackNoExtends._name = "WhackNoExtends"
 }(this);
 

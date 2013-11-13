@@ -1,6 +1,6 @@
-+function(p) {
++function(d) {
   var v, w;
-  function d(a, f) {
+  function m(a, f) {
     "#" === a.charAt(0) && (f = a, a = document.getElementById(a.substr(1)).innerHTML);
     !f && (f = "t" + r++);
     if(t[a]) {
@@ -8,11 +8,11 @@
     }
     var g, h;
     h = f;
-    var k, e, m = a.split("%>");
+    var k, e, n = a.split("}}");
     k = 1;
-    e = {0:{b:n, a:w}};
-    for(var l = 0, d = m.length;l < d;l++) {
-      var b = m[l].replace(/\\/g, "\\\\").split("<%");
+    e = {0:{b:p, a:w}};
+    for(var l = 0, d = n.length;l < d;l++) {
+      var b = n[l].replace(/\\/g, "\\\\").split("{{");
       "" !== b[0] && (e[k++] = {b:"=", a:"'" + b[0].replace(/'/g, "\\'").replace(/\n/g, "\\n") + "'"});
       if(b = b[1]) {
         var c = D.test(b) && s.$1;
@@ -21,7 +21,7 @@
         }else {
           c = b.charAt(0);
           if(" " === c) {
-            c = n
+            c = p
           }else {
             if("!" === c) {
               continue
@@ -33,28 +33,28 @@
         }
       }
     }
-    e[k++] = {b:n, a:v};
+    e[k++] = {b:p, a:v};
     e.c = k;
     h = E[h] = e;
     k = h.c;
     e = Array(k);
-    for(d = m = 0;d < k;d++) {
+    for(d = n = 0;d < k;d++) {
       b = h[d];
       l = b.b;
-      if(g !== l || l === n) {
-        e[m++] = ";"
+      if(g !== l || l === p) {
+        e[n++] = ";"
       }
       b = b.a;
-      if(l === n) {
-        e[m++] = b
+      if(l === p) {
+        e[n++] = b
       }else {
         if(l === x) {
           g = b[1] || "item";
-          var c = "i" + r, p = "l" + r, q = "a" + r;
+          var c = "i" + r, m = "l" + r, q = "a" + r;
           r++;
-          e[m++] = "for(var " + c + "=0," + g + "," + q + "=" + b[0] + "," + p + "=" + q + ".length;" + c + "<" + p + ";" + c + "++){" + g + "=" + q + "[" + c + "]"
+          e[n++] = "for(var " + c + "=0," + g + "," + q + "=" + b[0] + "," + m + "=" + q + ".length;" + c + "<" + m + ";" + c + "++){" + g + "=" + q + "[" + c + "]"
         }else {
-          "=" !== g ? e[m++] = "_o+=(" + b + ")" : e[m++] = "+(" + b + ")"
+          "=" !== g ? e[n++] = "_o+=(" + b + ")" : e[n++] = "+(" + b + ")"
         }
       }
       g = l
@@ -65,23 +65,23 @@
     f && !y[f] && (y[f] = g);
     return h
   }
-  var r = 0, s = p.RegExp, n = 1, x = 2, y = {}, t = {}, E = {};
+  var r = 0, s = d.RegExp, p = 1, x = 2, y = {}, t = {}, E = {};
   w = "var _o='';";
   v = "return _o";
   var u = {end:function() {
-    return{b:n, a:"}"}
+    return{b:p, a:"}"}
   }, "else":function() {
-    return{b:n, a:"} else {"}
+    return{b:p, a:"}else{"}
   }, elseif:function(a) {
-    return u["if"]("} else " + a)
+    return u["if"]("}else" + a)
   }, "if":function(a) {
     var f = a.lastIndexOf(":"), d = "" === a.split(":").slice(-1)[0].trim();
     -1 < f && d ? a = a.substr(0, f) + "{" : -1 === f && "" === a.split(")").slice(-1)[0].trim() && (a += "{");
-    return{b:n, a:a}
+    return{b:p, a:a}
   }, each:function(a) {
     a = F.test(a) && s;
     return{b:x, a:[a.$1, a.$2]}
-  }}, q = {}, z = p.chrome, A = p.document;
+  }}, q = {}, z = d.chrome, A = d.document;
   if(!z) {
     var B = A.createTextNode(""), C = A.createElement("span");
     C.appendChild(B)
@@ -91,13 +91,14 @@
     return z ? a.replace(G, "&amp;").replace(K, "&lt;").replace(J, "&gt;").replace(H, "&quot;").replace(I, "&#x27;").replace(L, "&#x2F;") : (B.nodeValue = a) && C.innerHTML
   };
   var F = /\(([\w\.\_]+),?\s*(\w+)?\)/, D = new s("^\\s*(" + Object.keys(u).join("|") + ")\\b");
-  d.f = q;
-  d.addFilter = function(a, d) {
+  m.f = q;
+  m.addFilter = function(a, d) {
     q[a] = d
   };
-  d.e = function(a) {
-    return d.f.escapeHTML(a)
+  m.e = function(a) {
+    return m.f.escapeHTML(a)
   };
-  p.WhackSmallest = d
+  d.WhackSmallest = m;
+  d.WhackSmallest._name = "WhackSmallest"
 }(this);
 

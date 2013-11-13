@@ -1,4 +1,4 @@
-+function(v) {
++function(t) {
   var w, x;
   function E(a, d) {
     var e, f, g = a.split("}}"), k, l;
@@ -9,7 +9,7 @@
       if(b = b[1]) {
         var c = N.test(b) && r.$1;
         if(c) {
-          if((b = A[c](b, d)) && b.b === t) {
+          if((b = A[c](b, d)) && b.b === u) {
             var c = g[++n], p = [c], b = b.a, q = 0;
             if(0 > c.indexOf("endblock")) {
               for(;!q && void 0 !== (c = g[++n]);) {
@@ -20,7 +20,7 @@
             c = E(p, b).replace(x, "").replace(w, "");
             z[b] = c;
             F[b] = e;
-            k ? f[F[b.replace(d, l)]] = {b:t, a:b} : f[e++] = {b:t, a:b}
+            k ? f[F[b.replace(d, l)]] = {b:u, a:b} : f[e++] = {b:u, a:b}
           }else {
             f[e++] = b
           }
@@ -52,14 +52,14 @@
         g[k++] = ";"
       }
       h = h.a;
-      l === m ? g[k++] = h : l === G ? (s = h[1] || "item", b = "i" + u, c = "l" + u, p = "a" + u, u++, g[k++] = "for(var " + b + "=0," + s + "," + p + "=" + h[0] + "," + c + "=" + p + ".length;" + b + "<" + c + ";" + b + "++){" + s + "=" + p + "[" + b + "]") : l === t ? g[k++] = z[h] : (h = "WhackFull.v(" + h + ")", "=" !== s ? g[k++] = "_o+=(" + h + ")" : g[k++] = "+(" + h + ")");
+      l === m ? g[k++] = h : l === G ? (s = h[1] || "item", b = "i" + v, c = "l" + v, p = "a" + v, v++, g[k++] = "for(var " + b + "=0," + s + "," + p + "=" + h[0] + "," + c + "=" + p + ".length;" + b + "<" + c + ";" + b + "++){" + s + "=" + p + "[" + b + "]") : l === u ? g[k++] = z[h] : (h = "WhackFull.v(" + h + ")", "=" !== s ? g[k++] = "_o+=(" + h + ")" : g[k++] = "+(" + h + ")");
       s = l
     }
     return g.join("")
   }
   function q(a, d) {
     "#" === a.charAt(0) && (d = a, a = document.getElementById(a.substr(1)).innerHTML);
-    !d && (d = "t" + u++);
+    !d && (d = "t" + v++);
     if(B[a]) {
       return B[a]
     }
@@ -68,15 +68,15 @@
     d && !C[d] && (C[d] = e);
     return f
   }
-  var u = 0, r = v.RegExp, m = 1, G = 2, t = 3, C = {}, B = {}, z = {}, y = {}, F = {};
+  var v = 0, r = t.RegExp, m = 1, G = 2, u = 3, C = {}, B = {}, z = {}, y = {}, F = {};
   x = "var _o='';";
   w = "return _o";
   var A = {end:function() {
     return{b:m, a:"}"}
   }, "else":function() {
-    return{b:m, a:"} else {"}
+    return{b:m, a:"}else{"}
   }, elseif:function(a) {
-    return A["if"]("} else " + a)
+    return A["if"]("}else" + a)
   }, "if":function(a) {
     var d = a.lastIndexOf(":"), e = "" === a.split(":").slice(-1)[0].trim();
     -1 < d && e ? a = a.substr(0, d) + "{" : -1 === d && "" === a.split(")").slice(-1)[0].trim() && (a += "{");
@@ -89,10 +89,10 @@
     return{b:m, a:z[a] || (z[a] = C[a].replace(x, "").replace(w, ""))}
   }, block:function(a, d) {
     var e = H.test(a) && r.$1;
-    return{b:t, a:d + ":" + e}
+    return{b:u, a:d + ":" + e}
   }, endblock:function() {
     return{b:"=", a:"''"}
-  }}, D = {}, I = v.chrome, J = v.document;
+  }}, D = {}, I = t.chrome, J = t.document;
   if(!I) {
     var K = J.createTextNode(""), L = J.createElement("span");
     L.appendChild(K)
@@ -112,6 +112,7 @@
   q.e = function(a) {
     return q.f.escapeHTML(a)
   };
-  v.WhackFull = q
+  t.WhackFull = q;
+  t.WhackFull._name = "WhackFull"
 }(this);
 
