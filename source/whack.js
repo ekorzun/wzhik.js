@@ -27,7 +27,7 @@
 
 // SUPPORT OPTS
 // ------------------------------------------------------------------------------------------------
-/** @define {boolean} */	var SUPPORT_OLD_BROWSERS = false;
+/** @define {boolean} */	var SUPPORT_OLD_BROWSERS = true;
 /** @define {boolean} */	var SUPPORT_SHORTCODES = true;
 /** @define {boolean} */	var SUPPORT_EXTENDS = true;
 /** @define {boolean} */	var SUPPORT_PARTIALS = true;
