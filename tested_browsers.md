@@ -14,6 +14,8 @@ Windows 7
 1. FF 24.0
 1. IE 9.0
 1. IE 8.0
+1. Opera 12.10
+1. Safari 5.1
 
 
 Windows XP
@@ -31,6 +33,14 @@ iOS
 1. iPad 2 (5.0)
 1. iPad 3 (5.1)
 1. iPad 3 (6.0)
+
+Mac OS
+------
+
+1. OS X Snow Leopard Chrome 28.0
+1. OS X Mountain Lion  Safari 6.0
+1. OS X Snow Leopard Opera 12.15
+1. OS X Lion  Firefox 24.0
 
 
 Android
