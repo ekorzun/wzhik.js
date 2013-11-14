@@ -3,8 +3,6 @@
 
 
 
-
-
 // COMPILATION FLAGS
 // ------------------------------------------------------------------------------------------------
 /** @define {boolean} */	var DEBUG = true;
@@ -187,7 +185,8 @@
 	}
 
 
-
+	// http://kangax.github.io/es5-compat-table/#Object.keys
+	// IE8- / FF3.6- / SF 4- / OP 11
 	if(SUPPORT_OLD_BROWSERS && !Object.keys) {
 		Object.keys = function( obj ){
 			var keys = [];
@@ -634,14 +633,14 @@
 
 
 		if(!_window['console']) {
-			_window['console'] = {
-				'log' : function(){},
-				'group' : function(){},
-				'groupEnd' : function(){},
-				'warn' : function(){},
-				'error': function(){}
-			};
+			_window['console'] = {};
 		}
+
+		!_window['console']['log'] && (_window['console']['log']  = function(){})
+		!_window['console']['group'] && (_window['console']['group']  = function(){})
+		!_window['console']['groupEnd'] && (_window['console']['groupEnd']  = function(){})
+		!_window['console']['warn'] && (_window['console']['warn']  = function(){})
+		!_window['console']['error'] && (_window['console']['error'] = function(){})
 
     }
 
