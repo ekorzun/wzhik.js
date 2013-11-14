@@ -49,3 +49,7 @@ Android
 1. Samsung Galaxy Note 10.1 (4.0)
 1. Samsung Galaxy S III (4.1)
 1. Samsung Galaxy Nexus (4.0)
+
+Windows Phone 8
+---------------
+1. Nokia Lumia 520  Internet Explorer 10 (mobile)
