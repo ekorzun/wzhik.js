@@ -1,3 +1,18 @@
+// win xp 
+// ie6 / ie7  не проходят 1 тест, предположительно из-за With
+
+// win 7
+// ie10 крашит, изза нефункциональности консоли (group / groupEnd)
+
+// ff 3.0 - повел как ие6 себя http://take.ms/i3VtFe (нет trima)
+// http://kangax.github.io/es5-compat-table/#String.prototype.trim
+
+QUnit.done(function( details ) {
+	var message = "Total: " + details.total + " Failed: " + details.failed + " Passed: " + details.passed + " Runtime: " + details.runtime;
+	document.getElementById("done").innerHTML = message;
+});
+
+
 function testCompileAll( o ) {
 	var fns = [Whack, WhackNoExtends, WhackSmallest, WhackSmallestWith];
 	if( o.fns ) fns = o.fns;
@@ -46,6 +61,7 @@ test("Basics", function(){
 		msg : "can interpolate semicolons / this"
 	});
 
+	// Falls in IE6/IE7 - probably beacuse of With
 	testCompileAll({
 		data: {a: -5},
 		tpl : "{{ if(data.a > 5) { }}{{= 1 }}{{ } else if( data.a > 3 ){ }}{{= 2 }}{{ } else { }}{{= 3 }}{{ } }}",
@@ -137,6 +153,7 @@ test("Functions inside and return primitives", function(){
 		fns : [WhackNoExtends, Whack]
 	});
 
+	// Тест не проходится без пробела в начале
 	testCompileAll({
 		data: {a: null, b: false, c: undefined},
 		tpl : " {{= data.a }}{{= data.b }}{{= data.c }}",
