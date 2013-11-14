@@ -1,8 +1,5 @@
 
 
-
-
-
 // COMPILATION FLAGS
 // ------------------------------------------------------------------------------------------------
 /** @define {boolean} */	var DEBUG = true;
@@ -184,6 +181,8 @@
 
 	}
 
+	var isChrome = _window['chrome'];
+
 
 	// http://kangax.github.io/es5-compat-table/#Object.keys
 	// IE8- / FF3.6- / SF 4- / OP 11
@@ -196,10 +195,30 @@
 	}
 
 
+ 
+	// http://jsperf.com/mega-trim-test
+	if(SUPPORT_OLD_BROWSERS && !String.prototype.trim) {
+		var whitespace = ' \n\r\t\v\f\u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000';
+		String.prototype.trim = function(){
+			var s = isChrome ? this.match(/\S+(?:\s+\S+)*/) : this;
+			
+			if( isChrome )
+				return s && s[0] || "";
+			var i = 0, j = s.length-1;
+	        
+	        while(i < s.length && whitespace.indexOf(s.charAt(i)) > -1)
+	                i++;
+	        while(j > i && whitespace.indexOf(s.charAt(j)) > -1)
+	                j--;
+
+	        return s.substring(i, j+1);
+		}
+	}
+
+
 	if( SUPPORT_FILTERS ) {
 
 		var _filters = {},
-			isChrome = _window['chrome'],
 			doc = _window.document;
 
 		if( !isChrome ) {
