@@ -1,125 +1,134 @@
 +function(g) {
-  var w, x;
-  function m(a, c) {
+  var x, y;
+  function q(a, c) {
     "#" === a.charAt(0) && (c = a, a = document.getElementById(a.substr(1)).innerHTML);
-    !c && (c = "t" + r++);
-    if(t[a]) {
-      return t[a]
+    !c && (c = "t" + s++);
+    if(u[a]) {
+      return u[a]
     }
-    var d, h;
+    var e, h;
     h = c;
-    var k, f, n = a.split("}}");
+    var k, f, m = a.split("}}");
     k = 1;
-    f = {0:{b:p, a:x}};
-    for(var l = 0, g = n.length;l < g;l++) {
-      var b = n[l].replace(/\\/g, "\\\\").split("{{");
-      "" !== b[0] && (f[k++] = {b:"=", a:"'" + b[0].replace(/'/g, "\\'").replace(/\n/g, "\\n") + "'"});
-      if(b = b[1]) {
-        var e = D.test(b) && s.$1;
-        if(e) {
-          b = u[e](b, h), f[k++] = b
+    f = {0:{b:n, a:y}};
+    for(var l = 0, g = m.length;l < g;l++) {
+      var b = m[l].replace(/\\/g, "\\\\").replace(/\t+/g, "\t").replace(/\n+/g, "\n").replace(/\n\t/, "");
+      if(!/^\s+$/.test(b) && (b = b.split("{{"), "" !== b[0] && (f[k++] = {b:"=", a:"'" + b[0].replace(/'/g, "\\'").replace(/\n/g, "\\n") + "'"}), b = b[1])) {
+        var d = E.test(b) && t.$1;
+        if(d) {
+          b = v[d](b, h), f[k++] = b
         }else {
-          e = b.charAt(0);
-          if(" " === e) {
-            e = p
+          d = b.charAt(0);
+          if(" " === d) {
+            d = n
           }else {
-            if("!" === e) {
+            if("!" === d) {
               continue
             }else {
-              "-" === e ? (e = "=", b = "WhackSmallest.e(" + b.substring(1) + ")") : ("=" === e && (b = b.substring(1)), /\|\s(\w+)/.test(b) && (e = s.$1, b = b.replace("| " + e, ""), b = "WhackSmallest.f." + e + "(" + b + ")"), e = "=")
+              if("-" === d) {
+                d = "=", b = "WhackSmallest.e(" + b.substring(1) + ")"
+              }else {
+                "=" === d && (b = b.substring(1));
+                if(/\|(\w+)(?:\((.+)\))?\s*$/.test(b)) {
+                  var d = t.$1, r = t.$2;
+                  q.f[d] && (b = b.replace("|" + d + (r ? "(" + r + ")" : ""), ""), b = "WhackSmallest.f." + d + "(" + b + (r && "," + r) + ")")
+                }
+                d = "="
+              }
             }
           }
-          e && (f[k++] = {b:e, a:b})
+          d && (f[k++] = {b:d, a:b})
         }
       }
     }
-    f[k++] = {b:p, a:w};
+    f[k++] = {b:n, a:x};
     f.c = k;
-    h = E[h] = f;
+    h = F[h] = f;
     k = h.c;
     f = Array(k);
-    for(g = n = 0;g < k;g++) {
+    for(g = m = 0;g < k;g++) {
       b = h[g];
       l = b.b;
-      if(d !== l || l === p) {
-        f[n++] = ";"
+      if(e !== l || l === n) {
+        f[m++] = ";"
       }
       b = b.a;
-      if(l === p) {
-        f[n++] = b
+      if(l === n) {
+        f[m++] = b
       }else {
-        if(l === y) {
-          d = b[1] || "item";
-          var e = "i" + r, m = "l" + r, q = "a" + r;
-          r++;
-          f[n++] = "for(var " + e + "=0," + d + "," + q + "=" + b[0] + "," + m + "=" + q + ".length;" + e + "<" + m + ";" + e + "++){" + d + "=" + q + "[" + e + "]"
+        if(l === z) {
+          e = b[1] || "item";
+          var d = "i" + s, r = "l" + s, p = "a" + s;
+          s++;
+          f[m++] = "for(var " + d + "=0," + e + "," + p + "=" + b[0] + "," + r + "=" + p + ".length;" + d + "<" + r + ";" + d + "++){" + e + "=" + p + "[" + d + "]"
         }else {
-          "=" !== d ? f[n++] = "_o+=(" + b + ")" : f[n++] = "+(" + b + ")"
+          "=" !== e ? f[m++] = "_o+=(" + b + ")" : f[m++] = "+(" + b + ")"
         }
       }
-      d = l
+      e = l
     }
-    d = f.join("");
-    h = new Function("data", d);
-    t[a] = h;
-    c && !z[c] && (z[c] = d);
+    e = f.join("");
+    h = new Function("_o", e);
+    u[a] = h;
+    c && !A[c] && (A[c] = e);
     return h
   }
-  var r = 0, s = g.RegExp, p = 1, y = 2, z = {}, t = {}, E = {};
-  x = "var _o='';";
-  w = "return _o";
-  var u = {end:function() {
-    return{b:p, a:"}"}
+  var s = 0, t = g.RegExp, n = 1, z = 2, A = {}, u = {}, F = {};
+  y = "var_o=''";
+  x = "return _o";
+  var v = {end:function() {
+    return{b:n, a:"}"}
   }, "else":function() {
-    return{b:p, a:"}else{"}
+    return{b:n, a:"}else{"}
   }, elseif:function(a) {
-    return u["if"]("}else" + a)
+    return v["if"]("}else" + a)
   }, "if":function(a) {
-    var c = a.lastIndexOf(":"), d = "" === a.split(":").slice(-1)[0].trim();
-    -1 < c && d ? a = a.substr(0, c) + "{" : -1 === c && "" === a.split(")").slice(-1)[0].trim() && (a += "{");
-    return{b:p, a:a}
+    var c = a.lastIndexOf(":"), e = "" === a.split(":").slice(-1)[0].trim();
+    -1 < c && e ? a = a.substr(0, c) + "{" : -1 === c && "" === a.split(")").slice(-1)[0].trim() && (a += "{");
+    return{b:n, a:a}
   }, each:function(a) {
-    a = F.test(a) && s;
-    return{b:y, a:[a.$1, a.$2]}
-  }}, q = g.chrome;
+    a = G.test(a) && t;
+    return{b:z, a:[a.$1, a.$2]}
+  }}, p = g.chrome;
   Object.keys || (Object.keys = function(a) {
-    var c = [], d;
-    for(d in a) {
-      a.hasOwnProperty(d) && c.push(d)
+    var c = [], e;
+    for(e in a) {
+      a.hasOwnProperty(e) && c.push(e)
     }
     return c
   });
   String.prototype.trim || (String.prototype.trim = function() {
-    var a = q ? this.match(/\S+(?:\s+\S+)*/) : this;
-    if(q) {
+    var a = p ? this.match(/\S+(?:\s+\S+)*/) : this;
+    if(p) {
       return a && a[0] || ""
     }
-    for(var c = 0, d = a.length - 1;c < a.length && -1 < " \n\r\t\v\f\u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000".indexOf(a.charAt(c));) {
+    for(var c = 0, e = a.length - 1;c < a.length && -1 < " \n\r\t\v\f\u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000".indexOf(a.charAt(c));) {
       c++
     }
-    for(;d > c && -1 < " \n\r\t\v\f\u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000".indexOf(a.charAt(d));) {
-      d--
+    for(;e > c && -1 < " \n\r\t\v\f\u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000".indexOf(a.charAt(e));) {
+      e--
     }
-    return a.substring(c, d + 1)
+    return a.substring(c, e + 1)
   });
-  var v = {}, A = g.document;
-  if(!q) {
-    var B = A.createTextNode(""), C = A.createElement("span");
-    C.appendChild(B)
+  var w = {}, B = g.document;
+  if(!p) {
+    var C = B.createTextNode(""), D = B.createElement("span");
+    D.appendChild(C)
   }
-  var G = /&/g, H = /"/g, I = /'/g, J = />/g, K = /</g, L = /\//g;
-  v.escapeHTML = function(a) {
-    return q ? a.replace(G, "&amp;").replace(K, "&lt;").replace(J, "&gt;").replace(H, "&quot;").replace(I, "&#x27;").replace(L, "&#x2F;") : (B.nodeValue = a) && C.innerHTML
+  var H = /&/g, I = /"/g, J = /'/g, K = />/g, L = /</g, M = /\//g;
+  w.escapeHTML = function(a) {
+    return p ? a.replace(H, "&amp;").replace(L, "&lt;").replace(K, "&gt;").replace(I, "&quot;").replace(J, "&#x27;").replace(M, "&#x2F;") : (C.nodeValue = a) && D.innerHTML
   };
-  var F = /\(([\w\.\_]+),?\s*(\w+)?\)/, D = new s("^\\s*(" + Object.keys(u).join("|") + ")\\b");
-  m.f = v;
-  m.addFilter = function(a, c) {
-    v[a] = c
+  var G = /\(([\w\.\_]+),?\s*(\w+)?\)/, E = new t("^\\s*(" + Object.keys(v).join("|") + ")\\b");
+  q.f = w;
+  q.addFilter = function(a, c) {
+    w[a] = c;
+    return q
   };
-  m.e = function(a) {
-    return m.f.escapeHTML(a)
+  q.e = function(a) {
+    return q.f.escapeHTML(a)
   };
-  g.WhackSmallest = m;
+  g.WhackSmallest = q;
   g.WhackSmallest._name = "WhackSmallest"
 }(this);
 
