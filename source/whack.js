@@ -1,11 +1,11 @@
 
 
+
 // COMPILATION FLAGS
 // ------------------------------------------------------------------------------------------------
-/** @define {boolean} */	var DEBUG = true;
+/** @define {boolean} */	var DEBUG = false;
 /** @define {string} */		var WHACK_NAME = "Whack";
-/** @define {boolean} */	var AUTOCOMPILE = false;
-/** @define {boolean} */	var EXTENDABLE_API = true;
+/** @define {boolean} */	var AUTOCOMPILE = true;
 /** @define {boolean} */	var IGNORE_NULLS = true;
 
 
@@ -19,6 +19,7 @@
 /** @define {string} */		var OPERATOR_ESCAPED_ECHO = "-";
 /** @define {string} */		var OPERATOR_COMMENT = "!";
 /** @define {string} */		var OUTPUT_VAR = "_o";
+/** @define {string} */		var INPUT_VAR = "_o";
 
 // SUPPORT OPTS
 // ------------------------------------------------------------------------------------------------
@@ -32,6 +33,8 @@
 // ------------------------------------------------------------------------------------------------
 /** @define {boolean} */	var EXPERIMENTAL_HAS_JQUERY = false;
 /** @define {boolean} */	var EXPERIMENTAL_HAS_BACKBONE = false;
+
+
 
 
 
@@ -72,10 +75,15 @@
 	// It is possible to use Whack in underscore's style
 	// E.g.  {a: 2} => a
 	if( USE_WITH ) {
-		var CODE_FIRST = "var "+OUTPUT_VAR + "=" + (DEBUG ? "[]" : "''") + ";" + "with(data){";
+		var CODE_FIRST = 
+			(IGNORE_NULLS ? "var _v=" + WHACK_NAME + ".v," : "var")
+			+ OUTPUT_VAR + "=" + (DEBUG ? "[]" : "''")
+			+ ";with("+INPUT_VAR+"){";
 		var CODE_LAST  = "} return " + OUTPUT_VAR;
 	} else {
-		var CODE_FIRST = "var "+OUTPUT_VAR + "=" + (DEBUG ? "[]" : "''") + ";";
+		var CODE_FIRST = 
+			(IGNORE_NULLS ? "var _v=" + WHACK_NAME + ".v," : "var")
+			+ OUTPUT_VAR + "=" + (DEBUG ? "[]" : "''");
 		var CODE_LAST  = "return " + OUTPUT_VAR;
 	}
 
@@ -321,7 +329,18 @@
 		for(var tokenIndex = 0, tokensLength = tokens.length; tokenIndex < tokensLength; tokenIndex++){
 
 			// Make sure that code doesnt contains slashes
-			var line = tokens[tokenIndex].replace(/\\/g,'\\\\');
+			var line = tokens[tokenIndex]
+				//@todo Needs perf testing
+				// May be problems with <pre />
+				.replace(/\\/g,'\\\\')
+				.replace(/\t+/g,'\t')
+				.replace(/\n+/g,'\n')
+				// .replace(/^\s{2,}/, '')
+				.replace(/\n\t/, "")
+
+			// Do not insert empty lines
+			if( /^\s+$/.test(line)) continue;
+
 			var l = line.split( OPEN_TAG );
 
 			// Code may start with plain text
@@ -426,11 +445,13 @@
 							code = code.substring(1);
 						}
 
-						if( SUPPORT_FILTERS && /\|\s(\w+)/.test(code)){
-							var f = _RegExp.$1;
-							code = code.replace("| " + f, "");
-							var __code = code;
-							code = WHACK_NAME + ".f." + f + "(" + code + ")";
+						if( SUPPORT_FILTERS && /\|(\w+)(?:\((.+)\))?\s*$/.test(code)){
+							var f = _RegExp.$1, param = _RegExp.$2;
+							if( buildTemplate['f'][f] ) {
+								code = code.replace("|" + f + (param ? ("("+param+")") : ""), "");
+								var __code = code;
+								code = WHACK_NAME + ".f." + f + "(" + code + (param && "," + param) + ")";
+							}
 						}
 
 						// @todo Backbone doesnt work with filters
@@ -526,14 +547,26 @@
 
 				if( IGNORE_NULLS ) {
 
-					v = WHACK_NAME + ".v(" 
-						+ v 
-						+ (DEBUG ? ((v || "").charAt(0) === "'" ? ("," + v) : (",'"+line._code+"'")):"") 
-						+ (DEBUG ? ((name || "").charAt(0) === "'" ? "''" : (',"'+name+'"')) :"") 
-						+ (DEBUG ? (","+compiledLinesIndex):"")
-					+ ")";
+					if ( DEBUG ) {
+						var variable = v;
+						var tplname = "'" + name + "'";
+						var variableString = (line._code || "") + "";
+
+						if(variableString.charAt(0) !== "'") {
+							variableString = "'" + variableString.replace(/'/g,'\\\'').replace(/\n/g,'\\n') + "'"
+						}
+
+						v = "_v(" +[variable, variableString, tplname, compiledLinesIndex].join(",") + ")";
+					} else {
+						v = v.charAt(0) === "'" ? v : ("_v(" + v + ")");
+					}
+
 				}
 
+
+				// http://jsperf.com/string-concat-vs-array-join-10000
+				// In debug mode we are using [].push instead of concat
+				// It's for easier debugging on dev enviroment because of formatted source
 				if( DEBUG ) {
 					
 					compiledLines[compiledLinesIndex++] = OUTPUT_VAR + '.push(' + v + ');';
@@ -541,9 +574,18 @@
 				} else {
 
 					if(lastOperator !== OPERATOR_ECHO){
-						compiledLines[compiledLinesIndex++] = (OUTPUT_VAR + '+=') + '(' + v + ')';
+						if( IGNORE_NULLS ) {
+							compiledLines[compiledLinesIndex++] = (OUTPUT_VAR + '+=') + v;
+						} else {
+							compiledLines[compiledLinesIndex++] = (OUTPUT_VAR + '+=') + '(' + v + ')';
+						}
 					} else {
-						compiledLines[compiledLinesIndex++] = '+(' + v + ')'
+						if( IGNORE_NULLS ) {
+							compiledLines[compiledLinesIndex++] = '+' + v;
+						} else {
+							compiledLines[compiledLinesIndex++] = '+(' + v + ')';
+						}
+						
 					}
 				}
 			}
@@ -554,7 +596,7 @@
 		if( DEBUG ) {
 
 			var compiled = compiledLines.join('');
-			console.log("Compiled function: ", js_beautify(compiled));
+			console.log("Compiled function: ", compiled);
 			return compiled;
 
 		} else {
@@ -581,15 +623,15 @@
 
 		!templateID && (templateID = "t" + tplHash++);
 
-		if( DEBUG ) {
-			console.group( "tpl: " + templateID );
-		}
-
 		// if(templateID && _cacheCompiled[templateID])
 		// 	return _cacheCompiled[templateID];
 
 		if(_cacheCompiledByTpl[templateString])
 			return _cacheCompiledByTpl[templateString];
+
+		if( DEBUG ) {
+			console.group( "tpl: " + templateID );
+		}
 
 		var compiled = compileTemplateString(templateString, templateID);
 
@@ -597,7 +639,7 @@
 			console.groupEnd("tpl: " + templateID);
 		}
 
-		var fn = new Function('data', compiled);
+		var fn = new Function(INPUT_VAR, compiled);
 
 		_cacheCompiledByTpl[templateString] = fn;
 
@@ -613,10 +655,15 @@
     if( IGNORE_NULLS ) {
     	buildTemplate['v'] = function( o, variable, templateID, lineNumber ){
     		if( DEBUG ) {
-    			if( o === undefined ) {
-    				console.warn("Undefined value: ", variable, '===', o, "in template", "#" +templateID, "at line", lineNumber);
-    			}
-    			return (typeof o === "number" || o) ? o : "";
+    			try {
+	    			if( o === undefined ) {
+	    				console.warn("Undefined value: ", variable, '===', o, "in template", "#" +templateID, "at line", lineNumber);
+	    			}
+	    			return (typeof o === "number" || o) ? o : "";
+	    		} catch(e) {
+
+	    		}
+
     		} else {
     			return (typeof o === "number" || o) ? o : "";
     		}
@@ -627,6 +674,7 @@
     	buildTemplate['f'] = _filters;
     	buildTemplate['addFilter'] = function(name, fn){
     		_filters[name] = fn;
+    		return buildTemplate
     	}
     }
 
@@ -643,13 +691,8 @@
     _window[WHACK_NAME]['_name'] = WHACK_NAME;
 
 
+
     if( DEBUG ) {
-
-		var js = document.createElement('script');
-		js.setAttribute('type', 'text/javascript');
-		js.setAttribute('src', "http://jsbeautifier.org/js/lib/beautify.js");
-		document.getElementsByTagName('HEAD')[0].appendChild(js);
-
 
 		if(!_window['console']) {
 			_window['console'] = {};
