@@ -19,7 +19,7 @@
 /** @define {string} */		var OPERATOR_ESCAPED_ECHO = "-";
 /** @define {string} */		var OPERATOR_COMMENT = "!";
 /** @define {string} */		var OUTPUT_VAR = "_o";
-/** @define {string} */		var INPUT_VAR = "_o";
+/** @define {string} */		var INPUT_VAR = "data";
 
 // SUPPORT OPTS
 // ------------------------------------------------------------------------------------------------

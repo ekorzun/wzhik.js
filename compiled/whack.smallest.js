@@ -68,7 +68,7 @@
       e = l
     }
     e = f.join("");
-    h = new Function("_o", e);
+    h = new Function("data", e);
     u[a] = h;
     c && !A[c] && (A[c] = e);
     return h

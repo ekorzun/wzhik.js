@@ -62,7 +62,7 @@
     if(D[a]) {
       return D[a]
     }
-    var d = F(a, c), f = new Function("_o", d);
+    var d = F(a, c), f = new Function("data", d);
     D[a] = f;
     c && !A[c] && (A[c] = d);
     return f

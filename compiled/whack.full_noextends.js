@@ -68,7 +68,7 @@
       e = m
     }
     e = f.join("");
-    h = new Function("_o", e);
+    h = new Function("data", e);
     w[a] = h;
     c && !y[c] && (y[c] = e);
     return h

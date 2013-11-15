@@ -67,12 +67,12 @@
       e = l
     }
     e = f.join("");
-    h = new Function("_o", e);
+    h = new Function("data", e);
     u[a] = h;
     c && !y[c] && (y[c] = e);
     return h
   }
-  var s = 0, t = g.RegExp, n = 1, x = 2, y = {}, u = {}, F = {}, C = "var_o='';with(_o){", E = "} return _o", v = {end:function() {
+  var s = 0, t = g.RegExp, n = 1, x = 2, y = {}, u = {}, F = {}, C = "var_o='';with(data){", E = "} return _o", v = {end:function() {
     return{b:n, a:"}"}
   }, "else":function() {
     return{b:n, a:"}else{"}
