@@ -1,38 +1,29 @@
 <html>
 <head>
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
-	<script src="http://documentcloud.github.io/underscore/underscore.js"></script>
-	<script src="http://documentcloud.github.io/backbone/backbone.js"></script>
-	<script src="source/whack.js"></script>
-	<script src="tests/reallife-data.js"></script>
-	<link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.12.0.css">
-
-	<script>
-		function testTPL(){
-			return Whack(Array.prototype.slice.call(arguments).join(""));
-		}
-
-		function testTPL2(){
-			var args = Array.prototype.slice.call(arguments);
-			var name = args[0];
-			args.shift();
-			return Whack(args.join(""), name);
-		}
-	</script>
+	<meta charset="utf-8">
+	<title>Whack Tests</title>
+	<link rel="stylesheet" href="vendor/mocha.css" />
 </head>
 <body>
-	<div id="qunit"></div>
-	<div id="qunit-fixture"></div>
+	<div id="mocha"></div>
+	<script src="http://code.jquery.com/jquery-2.1.1.js"></script>
 
+	<script src="dist/whack.dev.js"></script>
+	<script src="dist/whack.filters.js"></script>
 
-	<!-- Multi line tpl -->
-	<script type="text/tpl" id='js-tpl-1'>
-		{{ var x = 5 }}
-	</script>
+	
+	<script src="vendor/expect.js"></script>
+	<script src="vendor/mocha.js"></script>
+	<script>assert = chai.assert</script>
+	<script>mocha.setup('bdd')</script>
 
-
-	<script src="http://code.jquery.com/qunit/qunit-1.12.0.js"></script>
-	<script src="tests/basic.js"></script>
-	<script src="tests/advanced.js"></script>
+	<script src="test/spec/test-basics.js"></script>
+	<script src="test/spec/test-syntax.js"></script>
+	<script src="test/spec/test-filters.js"></script>
+	<script>
+    mocha.checkLeaks();
+    mocha.globals(['jQuery']);
+    mocha.run();
+  </script>
 </body>
 </html>
