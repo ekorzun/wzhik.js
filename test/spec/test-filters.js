@@ -2,15 +2,22 @@ describe('Whack has cool filters', function() {
 
 	var tpl, exp;
 
+	describe('escaping', function() {
+		it("should escape", function(){
+			tpl = Whack("{{- data.str }}")({str : "&"});
+			assert.equal(tpl, "&amp;");
+		});
+	});
+
 	describe('filters', function() {
 		
 		it('plural', function() {
 			var data = {n1: 1, n2: 2, n3: 3, n4: 5, n5: 11, n6: 22, n7: 33, n8: 0, cows : "korova,korovy,korov" }
 
-			tpl = Whack("{{= data.n1 |plural(data.cows) }}")( data );
+			tpl = Whack("{{= 1 |plural(data.cows) }}")( data );
 			assert.equal(tpl, "1 korova");
 
-			tpl = Whack("{{= data.n2 |plural(data.cows) }}")( data );
+			tpl = Whack("{{= 2 |plural(data.cows) }}")( data );
 			assert.equal(tpl, "2 korovy");
 
 			tpl = Whack("{{= data.n3 |plural(data.cows) }}")( data );

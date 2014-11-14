@@ -3,27 +3,62 @@
 	<meta charset="utf-8">
 	<title>Whack Tests</title>
 	<link rel="stylesheet" href="vendor/mocha.css" />
+	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/default.min.css">
+	<style>
+		.hljs {background: transparent;}
+	</style>
 </head>
 <body>
 	<div id="mocha"></div>
-	<script src="http://code.jquery.com/jquery-2.1.1.js"></script>
 
-	<script src="dist/whack.dev.js"></script>
-	<script src="dist/whack.filters.js"></script>
-
+	<!-- browser test -->
 	
+	<script type="text/tpl" id="test-simple">
+		<div>
+			<p>
+				<img src="{{=  window.asd() }}" alt="{{= xz }}">		
+			</p>
+			<p>
+				<img src="{{=  undefined2 }}" alt="">		
+			</p>
+		</div>
+		<a href="#" title="">{{= undef1 }}</a>
+	</script>
+
+	<!-- /browser test -->
+
+	<script src="http://code.jquery.com/jquery-2.1.1.js"></script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+	<script src="vendor/jsbeautifer.js"></script>
 	<script src="vendor/expect.js"></script>
 	<script src="vendor/mocha.js"></script>
-	<script>assert = chai.assert</script>
-	<script>mocha.setup('bdd')</script>
-
+	<script>
+		assert = chai.assert;
+		mocha.setup("bdd");
+		if( window.location.href.indexOf("cover") > -1 ) {
+			document.write('<s'+'cript src="vendor/blanket.js"></s'+'cript>');
+			document.write('<s'+'cript src="compiled/whack.full.js" data-cover></s'+'cript>');
+		} else {
+			document.write('<s'+'cript src="dist/whack.dev.js"></s'+'cript>');
+		}
+	</script>
+	
+	<script src="dist/whack.filters.js" data-cover></script>
+<!-- 
 	<script src="test/spec/test-basics.js"></script>
 	<script src="test/spec/test-syntax.js"></script>
 	<script src="test/spec/test-filters.js"></script>
+	 -->
+	<script src="test/spec/test-browser.js"></script>
 	<script>
-    mocha.checkLeaks();
-    mocha.globals(['jQuery']);
-    mocha.run();
-  </script>
+			mocha.noHighlighting();
+			mocha.checkLeaks();
+		    mocha.globals(['jQuery']);
+		    mocha.run(function(){
+		    	$('pre code').each(function(i, block) {
+    				hljs.highlightBlock(block);
+  				});
+		    });
+	</script>
 </body>
 </html>

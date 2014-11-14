@@ -4,23 +4,38 @@ describe('Whack can do basic things', function(){
 	var tpl, exp;
 	globalVariable = "Hello";
 
-	describe('interpolate nothing', function(){
-		it('should return same text if there is no special markup', function(){
-			tpl = Whack("<div><p>Just some text. Hey, I know this is silly but it aids consistency.</p></div>")();
-			exp = "<div><p>Just some text. Hey, I know this is silly but it aids consistency.</p></div>";
-			
-			assert.equal(tpl, exp);
+	describe('Interpolate nothing', function(){
+		
+		it('Return same text if there is no special markup', function(){
+			var templateString = [
+				"<div>",
+					"<p>",
+						"Just some text. Hey, I know this is silly but it aids consistency.",
+					"</p>",
+				"</div>"
+			].join("");
+			// Compiling template string to template function
+			var template = Whack(templateString);
+			// Executing template
+			var result = template();
+			// Expected result
+			var expected = "<div><p>Just some text. Hey, I know this is silly but it aids consistency.</p></div>";
+			// Check the result
+			assert.equal(result, expected);
 		});
 
 		it('should return empty string if empty string passed', function(){
-			tpl = Whack("")();
-			exp = "";
+			// Compiling empty string
+			var template = Whack("");
+			var expected = "";
 			assert.equal(tpl, exp);
 		});
+
+
 	});
 
 
-	describe('interpolate empty values', function(){
+	describe('Interpolate empty values', function(){
 
 		var data = {
 			null_val : null,

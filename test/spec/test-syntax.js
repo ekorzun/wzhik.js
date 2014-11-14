@@ -208,6 +208,36 @@ describe('Whack has cool buit-in syntax shortcodes', function() {
 			assert.equal( tpl2, expect2 );
 		});
 
+
+		it('basic one-level extends', function() {
+			var expect, tpl2, expect2;
+
+			expect = "Parent Header Parent content Parent footer";
+			expect2 = "Parent Header xz Parent footer";
+
+			tpl = Whack([
+				"{{ block header }}",
+					"Parent Header ",
+				"{{ endblock }}",
+				"{{ block content }}",
+					"Parent content ",
+				"{{ endblock }}",
+				"{{ block footer }}",
+					"Parent footer",
+				"{{ endblock }}",
+			].join(""),"parenttpl2")();
+
+
+			assert.equal( tpl, expect );
+
+			tpl2 = Whack([
+				"{{ extends parenttpl2 }}",
+				"{{ block content }}{{= data.x }} {{ endblock }}",
+			].join(""), "childtpl2")({x : "xz"});
+
+			assert.equal( tpl2, expect2 );
+		});
+
 	});
 
 });

@@ -2436,7 +2436,7 @@ function Doc(runner) {
   runner.on('pass', function(test){
     console.log('%s  <dt>%s</dt>', indent(), utils.escape(test.title));
     var code = utils.escape(utils.clean(test.fn.toString()));
-    console.log('%s  <dd><pre><code>%s</code></pre></dd>', indent(), code);
+    console.log('%s  <dd><pre><code class="javascript">%s</code></pre></dd>', indent(), code);
   });
 
   runner.on('fail', function(test, err){
@@ -2742,7 +2742,7 @@ function HTML(runner) {
           : 'none';
       });
 
-      var pre = fragment('<pre><code>%e</code></pre>', utils.clean(test.fn.toString()));
+      var pre = fragment('<pre><code class="javascript">%e</code></pre>', utils.clean(test.fn.toString()));
       el.appendChild(pre);
       pre.style.display = 'none';
     }
