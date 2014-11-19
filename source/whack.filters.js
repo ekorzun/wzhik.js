@@ -1,6 +1,0 @@
-
-
-	Whack
-
-
-	//= ./filters/
