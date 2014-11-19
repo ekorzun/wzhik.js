@@ -7,10 +7,10 @@
 // Debug information
 // error detection
 // formatted template sources etc.
-/** @define {boolean} */	var DEBUG = false;
+/** @define {boolean} */	var DEBUG = true;
 
 // Global variable name
-/** @define {string} */		var WHACK_NAME = "Whack";
+/** @define {string} */		var ZIPPR_NAME = "Zippr";
 
 // 
 /** @define {boolean} */	var AUTOCOMPILE = true;
@@ -34,6 +34,7 @@
 /** @define {string} */		var OPERATOR_ECHO = "=";
 /** @define {string} */		var OPERATOR_ESCAPED_ECHO = "-";
 /** @define {string} */		var OPERATOR_COMMENT = "#";
+/** @define {string} */		var OPERATOR_FILTER = "|";
 /** @define {string} */		var OUTPUT_VAR = "_o";
 /** @define {string} */		var INPUT_VAR = "data";
 
@@ -54,8 +55,12 @@
 
 	var server = (typeof exports !== 'undefined');
 
-	// Simple increment ID for each tpl/patrial etc.
+	// Simple increment ID for for tpl/patrial etc.
 	var UID = 0;
+
+	if( DEBUG ) {
+		var TUID = 0;
+	}
 
 	// regexp.test is the fastest way
 	// E.g. var x = /(\w+)/.test( string ) && RegExp.$1
@@ -84,7 +89,7 @@
 		CODE_LAST = "return " + OUTPUT_VAR;
 
 
-	// It is possible to use Whack in Underscore's style
+	// It is possible to use Zippr in Underscore's style
 	// E.g.  {someProp: 2} => someProp
 	// It is not recommended to use this setting
 	// http://www.2ality.com/2011/06/with-statement.html
@@ -92,7 +97,7 @@
 
 		// @todo Try to replace "With" with real(?) local vars
 		CODE_FIRST = 
-			(IGNORE_NULLS ? "var _v=" + WHACK_NAME + ".v," : "var")
+			(IGNORE_NULLS ? "var _v=" + ZIPPR_NAME + ".v," : "var")
 			+ OUTPUT_VAR + "=" + (DEBUG ? "[]" : "''")
 			+ ";with(" + INPUT_VAR + "){";
 
@@ -101,21 +106,23 @@
 	} else {
 
 		CODE_FIRST = 
-			(IGNORE_NULLS ? "var _v=" + WHACK_NAME + ".v," : "var")
+			(IGNORE_NULLS ? "var _v=" + ZIPPR_NAME + ".v," : "var")
 			+ OUTPUT_VAR + "=" + (DEBUG ? "[]" : "''");
 	}
 
 
 	// 
 	if( DEBUG ) {
-		CODE_FIRST = "try{" + CODE_FIRST;
-		CODE_LAST = (USE_WITH ? "}" : "") + "}catch(e){console.error(e.message);};" + "return " + OUTPUT_VAR + (DEBUG ? ".join('')" : "");
+		// CODE_FIRST = "try{" + CODE_FIRST;
+		// CODE_LAST = (USE_WITH ? "}" : "") + "}catch(e){console.error(e.message);};" + "return " + OUTPUT_VAR + (DEBUG ? ".join('')" : "");
+		CODE_FIRST += ",_d=" + ZIPPR_NAME + ".debug";
+		CODE_LAST = (USE_WITH ? "}" : "") + "return " + OUTPUT_VAR + (DEBUG ? ".join('')" : "");
 	}
 
 
 
 	//= "_oldbrowsers.js"
-	//= "_support.js"
+	//= "_utils.js"
 	//= "_parser.js"
 	//= "_compiler.js"
 	
@@ -123,7 +130,7 @@
 	//
 	//
 	//
-	function Whack(templateString, templateID){
+	function Zippr(templateString, templateID, isPartial ){
 
 		if(templateString.charAt(0) === "#"){
 			templateID = templateString;
@@ -152,7 +159,7 @@
 			console.group( "tpl: " + templateID );
 		}
 
-		var compiled = compileTemplateString(templateString, templateID);
+		var compiled = compileTemplateString(templateString, templateID, isPartial);
 
 		if( DEBUG ) {
 			console.groupEnd("tpl: " + templateID);
@@ -173,35 +180,22 @@
 
     // "_experimental.js"
 
-    root[WHACK_NAME] = Whack;
     
-    // For tests usage only
-    root[WHACK_NAME]['_name'] = WHACK_NAME;
+    if( DEBUG ) {
 
-    if (server) {
-        module.exports = Whack;
-    } else {
-        if (typeof define === 'function') {
-            define(WHACK_NAME, [], function () {
-            	return Whack; 
-            });
-        } else {
-        	root[WHACK_NAME] = Whack;
-        }
+    	//= "_debug.js"
     }
 
 
-    if( DEBUG ) {
+    root[ZIPPR_NAME] = Zippr;
+    
+    // For tests usage only
+    root[ZIPPR_NAME]['_name'] = ZIPPR_NAME;
 
-		if(!root['console']) {
-			console = root['console'] = {};
-		}
-		
-		(["log", "group", "groupEnd", "warn", "error", "info"]).forEach(function( fn ){
-			!console[fn] && (console[fn] = function(){});
-		});
-
-
+    if( typeof exports !== 'undefined' ) {
+    	module['exports'] = Zippr;
+    } else {
+    	root[ZIPPR_NAME] = Zippr;
     }
 
 }( this );
