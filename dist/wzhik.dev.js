@@ -10,7 +10,7 @@
 /** @define {boolean} */	var DEBUG = true;
 
 // Global variable name
-/** @define {string} */		var ZIPPR_NAME = "Zippr";
+/** @define {string} */		var WZHIK_NAME = "Wzhik";
 
 // 
 /** @define {boolean} */	var AUTOCOMPILE = true;
@@ -89,7 +89,7 @@
 		CODE_LAST = "return " + OUTPUT_VAR;
 
 
-	// It is possible to use Zippr in Underscore's style
+	// It is possible to use Wzhik in Underscore's style
 	// E.g.  {someProp: 2} => someProp
 	// It is not recommended to use this setting
 	// http://www.2ality.com/2011/06/with-statement.html
@@ -97,7 +97,7 @@
 
 		// @todo Try to replace "With" with real(?) local vars
 		CODE_FIRST = 
-			(IGNORE_NULLS ? "var _v=" + ZIPPR_NAME + ".v," : "var")
+			(IGNORE_NULLS ? "var _v=" + WZHIK_NAME + ".v," : "var")
 			+ OUTPUT_VAR + "=" + (DEBUG ? "[]" : "''")
 			+ ";with(" + INPUT_VAR + "){";
 
@@ -106,7 +106,7 @@
 	} else {
 
 		CODE_FIRST = 
-			(IGNORE_NULLS ? "var _v=" + ZIPPR_NAME + ".v," : "var")
+			(IGNORE_NULLS ? "var _v=" + WZHIK_NAME + ".v," : "var")
 			+ OUTPUT_VAR + "=" + (DEBUG ? "[]" : "''");
 	}
 
@@ -115,7 +115,7 @@
 	if( DEBUG ) {
 		// CODE_FIRST = "try{" + CODE_FIRST;
 		// CODE_LAST = (USE_WITH ? "}" : "") + "}catch(e){console.error(e.message);};" + "return " + OUTPUT_VAR + (DEBUG ? ".join('')" : "");
-		CODE_FIRST += ",_d=" + ZIPPR_NAME + ".debug";
+		CODE_FIRST += ",_d=" + WZHIK_NAME + ".debug";
 		CODE_LAST = (USE_WITH ? "}" : "") + "return " + OUTPUT_VAR + (DEBUG ? ".join('')" : "");
 	}
 
@@ -172,7 +172,7 @@
 			t2	= /</g,
 			sl 	= /\//g;
 	
-		Zippr['e'] = _filters["escape"] = function( code ) {
+		Wzhik['e'] = _filters["escape"] = function( code ) {
 			return isChrome
 				? code
 					.replace(amp, '&amp;')
@@ -184,10 +184,10 @@
 				: (DOMtext.nodeValue = code) && DOMelement.innerHTML;
 		}
 	
-		Zippr['f'] = _filters;
-		Zippr['addFilter'] = function(name, fn){
+		Wzhik['f'] = _filters;
+		Wzhik['addFilter'] = function(name, fn){
 			_filters[name] = fn;
-			return Zippr
+			return Wzhik
 		}
 	}
 	
@@ -200,7 +200,7 @@
 		// v(false) === ""
 		// v(undefined) === ""
 		// v(0) === 0
-		Zippr['v'] = function( value, templateID, lineNumber ){
+		Wzhik['v'] = function( value, templateID, lineNumber ){
 			if( DEBUG ) {
 				if( lineNumber ) {
 					if( value === undefined ) {
@@ -222,7 +222,7 @@
 	
 	// @todo perf test: array detection vs 2 functions for object and array
 	// Each function
-	Zippr["each"] = function(subject, fn){
+	Wzhik["each"] = function(subject, fn){
 		for(
 			var index = -1,
 				isarr = subject instanceof Array,
@@ -273,13 +273,13 @@
 		var extended;
 		var parentID;
 	
-		// If Zippr supports extend, it should be in the first line
+		// If Wzhik supports extend, it should be in the first line
 		if( SUPPORT_EXTENDS && (parentID = regexEXTEND.test(tokens[0]) && _RegExp.$1)) {
 	
 			// In autocompile mode make sure that parentID is exist
 			if(AUTOCOMPILE && !_cacheParsing[parentID]){
 				// Try to compile parent from DOM useing ID selector
-				Zippr( parentID );
+				Wzhik( parentID );
 				if(DEBUG && !_cacheParsing[parentID]) {
 					console.error("Autocompilation for", parentID, "failed");
 				}
@@ -310,7 +310,7 @@
 	
 		} else {
 	
-			// Zippr doesnt support extending, so we use default code
+			// Wzhik doesnt support extending, so we use default code
 			parsedLinesIndex = 1;
 	
 			// if( DEBUG ) {
@@ -481,7 +481,7 @@
 					} else if( symbol === OPERATOR_ESCAPED_ECHO) {
 	
 						operator = OPERATOR_ECHO;
-						code = ZIPPR_NAME + ".e" + "(" + code.substring(1) + ")";
+						code = WZHIK_NAME + ".e" + "(" + code.substring(1) + ")";
 	
 					} else {
 	
@@ -491,10 +491,10 @@
 	
 						if( SUPPORT_FILTERS && /\|(\w+)(?:\((.+)\))?\s*$/.test(code)){
 							var f = _RegExp.$1, param = _RegExp.$2;
-							if( Zippr['f'][f] ) {
+							if( Wzhik['f'][f] ) {
 								code = code.replace("|" + f + (param ? ("("+param+")") : ""), "");
 								// var __code = code;
-								code = ZIPPR_NAME + ".f." + f + "(" + code + (param && "," + param) + ")";
+								code = WZHIK_NAME + ".f." + f + "(" + code + (param && "," + param) + ")";
 							}
 						}
 	
@@ -537,7 +537,7 @@
 	
 	
 	if( DEBUG ) {
-		Zippr.parseTemplateString = parseTemplateString;
+		Wzhik.parseTemplateString = parseTemplateString;
 	}
 	
 	
@@ -604,7 +604,7 @@
 	
 			if(AUTOCOMPILE && !_cacheCompiled[r]){
 	
-				Zippr(r);
+				Wzhik(r);
 	
 				_cachePartials[r] = _cacheCompiled[r].replace(CODE_FIRST, "").replace(CODE_LAST, "");
 	
@@ -709,7 +709,7 @@
 				// compiledLines[compiledLinesIndex++] = OUTPUT_VAR + '.push(' + '"<!--' + v[0] + '-->");';
 				compiledLines[compiledLinesIndex++] = (
 					"var " + arr + "=" + v[0] +
-					";Zippr.each(" + arr + ",function(" + item + "," + iter + "," + item + "_isFirst," + item + "_isLast," + item + "_isEven" + "){"
+					";Wzhik.each(" + arr + ",function(" + item + "," + iter + "," + item + "_isFirst," + item + "_isLast," + item + "_isEven" + "){"
 					// var a1 = data.array,
 					// "var " + arr + "=" + v[0] + 
 					// ";for(var " + iter + "=0," + item + "," + len + "=" + arr + ".length;" +
@@ -826,7 +826,7 @@
 	//
 	//
 	//
-	function Zippr(templateString, templateID, isPartial ){
+	function Wzhik(templateString, templateID, isPartial ){
 
 		if(templateString.charAt(0) === "#"){
 			templateID = templateString;
@@ -852,7 +852,7 @@
 			return _cacheCompiledByTpl[templateString];
 
 		if( DEBUG ) {
-			console.group( "tpl: " + templateID );
+			(console.groupCollapsed || console.group)( "tpl: " + templateID );
 		}
 
 		var compiled = compileTemplateString(templateString, templateID, isPartial);
@@ -909,7 +909,7 @@
     		return result;
     	}
     	
-    	Zippr["debug"] = function( templateID, originalLineNumber, err){
+    	Wzhik["debug"] = function( templateID, originalLineNumber, err){
     		console.error([
     				"Error in template: " + templateID,
     				"Line number: " + originalLineNumber,
@@ -949,11 +949,11 @@
     	function UID(){}
     	
     	
-    	Zippr["displayError"] = function displayError(){}
+    	Wzhik["displayError"] = function displayError(){}
     	
-    	Zippr["displayWarning"] = function displayWarning(){}
+    	Wzhik["displayWarning"] = function displayWarning(){}
     	
-    	Zippr["displayInfo"] = function displayInfo(){}
+    	Wzhik["displayInfo"] = function displayInfo(){}
     	
     	
     	if(!root['console']) {
@@ -966,15 +966,15 @@
     }
 
 
-    root[ZIPPR_NAME] = Zippr;
+    root[WZHIK_NAME] = Wzhik;
     
     // For tests usage only
-    root[ZIPPR_NAME]['_name'] = ZIPPR_NAME;
+    root[WZHIK_NAME]['_name'] = WZHIK_NAME;
 
     if( typeof exports !== 'undefined' ) {
-    	module['exports'] = Zippr;
+    	module['exports'] = Wzhik;
     } else {
-    	root[ZIPPR_NAME] = Zippr;
+    	root[WZHIK_NAME] = Wzhik;
     }
 
 }( this );
