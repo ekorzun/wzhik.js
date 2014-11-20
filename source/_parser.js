@@ -27,13 +27,13 @@ function parseTemplateString( templateString, name){
 	var extended;
 	var parentID;
 
-	// If Zippr supports extend, it should be in the first line
+	// If Wzhik supports extend, it should be in the first line
 	if( SUPPORT_EXTENDS && (parentID = regexEXTEND.test(tokens[0]) && _RegExp.$1)) {
 
 		// In autocompile mode make sure that parentID is exist
 		if(AUTOCOMPILE && !_cacheParsing[parentID]){
 			// Try to compile parent from DOM useing ID selector
-			Zippr( parentID );
+			Wzhik( parentID );
 			if(DEBUG && !_cacheParsing[parentID]) {
 				console.error("Autocompilation for", parentID, "failed");
 			}
@@ -64,7 +64,7 @@ function parseTemplateString( templateString, name){
 
 	} else {
 
-		// Zippr doesnt support extending, so we use default code
+		// Wzhik doesnt support extending, so we use default code
 		parsedLinesIndex = 1;
 
 		// if( DEBUG ) {
@@ -235,7 +235,7 @@ function parseTemplateString( templateString, name){
 				} else if( symbol === OPERATOR_ESCAPED_ECHO) {
 
 					operator = OPERATOR_ECHO;
-					code = ZIPPR_NAME + ".e" + "(" + code.substring(1) + ")";
+					code = WZHIK_NAME + ".e" + "(" + code.substring(1) + ")";
 
 				} else {
 
@@ -245,10 +245,10 @@ function parseTemplateString( templateString, name){
 
 					if( SUPPORT_FILTERS && /\|(\w+)(?:\((.+)\))?\s*$/.test(code)){
 						var f = _RegExp.$1, param = _RegExp.$2;
-						if( Zippr['f'][f] ) {
+						if( Wzhik['f'][f] ) {
 							code = code.replace("|" + f + (param ? ("("+param+")") : ""), "");
 							// var __code = code;
-							code = ZIPPR_NAME + ".f." + f + "(" + code + (param && "," + param) + ")";
+							code = WZHIK_NAME + ".f." + f + "(" + code + (param && "," + param) + ")";
 						}
 					}
 
@@ -291,7 +291,7 @@ function parseTemplateString( templateString, name){
 
 
 if( DEBUG ) {
-	Zippr.parseTemplateString = parseTemplateString;
+	Wzhik.parseTemplateString = parseTemplateString;
 }
 
 
@@ -358,7 +358,7 @@ if( SUPPORT_PARTIALS ) {
 
 		if(AUTOCOMPILE && !_cacheCompiled[r]){
 
-			Zippr(r);
+			Wzhik(r);
 
 			_cachePartials[r] = _cacheCompiled[r].replace(CODE_FIRST, "").replace(CODE_LAST, "");
 

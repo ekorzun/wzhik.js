@@ -28,7 +28,7 @@ function getOriginalLineFromParsedIndex( parsed, name ) {
 	return result;
 }
 
-Zippr["debug"] = function( templateID, originalLineNumber, err){
+Wzhik["debug"] = function( templateID, originalLineNumber, err){
 	console.error([
 			"Error in template: " + templateID,
 			"Line number: " + originalLineNumber,
@@ -68,11 +68,11 @@ function getInfo( templateID ){}
 function UID(){}
 
 
-Zippr["displayError"] = function displayError(){}
+Wzhik["displayError"] = function displayError(){}
 
-Zippr["displayWarning"] = function displayWarning(){}
+Wzhik["displayWarning"] = function displayWarning(){}
 
-Zippr["displayInfo"] = function displayInfo(){}
+Wzhik["displayInfo"] = function displayInfo(){}
 
 
 if(!root['console']) {

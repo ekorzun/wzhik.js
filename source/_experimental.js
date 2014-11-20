@@ -42,9 +42,9 @@ if(SUPPORT_EXPERIMENTAL) {
 
     		if( vars[variable] ) {
     			if( DEBUG ) {
-    				vars[variable].data = Zippr.v(value);
+    				vars[variable].data = Wzhik.v(value);
     			} else {
-    				vars[variable].data = Zippr.v(value);
+    				vars[variable].data = Wzhik.v(value);
     			}
     		}
     	}
@@ -62,7 +62,7 @@ if(SUPPORT_EXPERIMENTAL) {
 
 
     // Redefine
-    function Zippr(templateString, templateID){
+    function Wzhik(templateString, templateID){
 
 		if(templateString.charAt(0) === "#"){
 			templateID = templateString;

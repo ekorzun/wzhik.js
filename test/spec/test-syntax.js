@@ -1,27 +1,27 @@
-describe('Zippr has cool buit-in syntax shortcodes', function() {
+describe('Wzhik has cool buit-in syntax shortcodes', function() {
 
 	var tpl, exp;
 
 	// describe('if/else/elseif statements', function() {
 		
 	// 	it('simple if', function(){
-	// 		tpl = Zippr("{{ if(true) }}1{{ end }}")();
+	// 		tpl = Wzhik("{{ if(true) }}1{{ end }}")();
 	// 		assert.equal(tpl, "1");
-	// 		tpl = Zippr("{{ if(false || true) }}1{{ end }}")();
+	// 		tpl = Wzhik("{{ if(false || true) }}1{{ end }}")();
 	// 		assert.equal(tpl, "1");
-	// 		tpl = Zippr("{{ if( false ) }}1{{ end }}")();
+	// 		tpl = Wzhik("{{ if( false ) }}1{{ end }}")();
 	// 		assert.equal(tpl, "");
 	// 	});
 
 	// 	it('if and else', function(){
-	// 		tpl = Zippr("{{ if(false) }}1{{else}}2{{ end }}")();
+	// 		tpl = Wzhik("{{ if(false) }}1{{else}}2{{ end }}")();
 	// 		assert.equal(tpl, "2");
-	// 		tpl = Zippr("{{ if(false && true) }}{{else}}2{{ end }}")();
+	// 		tpl = Wzhik("{{ if(false && true) }}{{else}}2{{ end }}")();
 	// 		assert.equal(tpl, "2");
 	// 	});
 
 	// 	it('if and elseif', function(){
-	// 		tpl = Zippr([
+	// 		tpl = Wzhik([
 	// 			"{{ if(false) }}",
 	// 				1,
 	// 			"{{ elseif(true) }}",
@@ -30,7 +30,7 @@ describe('Zippr has cool buit-in syntax shortcodes', function() {
 	// 		].join(""))();
 	// 		assert.equal(tpl, "2");
 
-	// 		tpl = Zippr([
+	// 		tpl = Wzhik([
 	// 			"{{ if(false) }}",
 	// 				1,
 	// 			"{{ elseif(false) }}",
@@ -43,7 +43,7 @@ describe('Zippr has cool buit-in syntax shortcodes', function() {
 	// 	});
 
 	// 	it('if inside if', function(){
-	// 		tpl = Zippr([
+	// 		tpl = Wzhik([
 	// 			"{{ if(false) }}",
 	// 				1,
 	// 			"{{ elseif(false) }}",
@@ -64,7 +64,7 @@ describe('Zippr has cool buit-in syntax shortcodes', function() {
 	// 	});
 
 	// 	it('if inside each', function(){
-	// 		tpl = Zippr("{{ forEach(data.arr, i) }}{{ if(i > 2) }}{{ forEach(data.arr2, j) }}{{= j }}{{ endeach }}{{ end }}{{ endeach }}")({
+	// 		tpl = Wzhik("{{ forEach(data.arr, i) }}{{ if(i > 2) }}{{ forEach(data.arr2, j) }}{{= j }}{{ endeach }}{{ end }}{{ endeach }}")({
 	// 			arr : [1,2,3],
 	// 			arr2: [4,5,6]
 	// 		});
@@ -85,7 +85,7 @@ describe('Zippr has cool buit-in syntax shortcodes', function() {
 				"{{ endeach }}"
 			].join("");
 			// Compiling template string to template function
-			var template = Zippr(templateString);
+			var template = Wzhik(templateString);
 			// Executing template
 			var result = template({arr : [1,2,3,4,5]});
 			// Expected result
@@ -104,7 +104,7 @@ describe('Zippr has cool buit-in syntax shortcodes', function() {
 				"{{ endeach }}"
 			].join("");
 			// Compiling template string to template function
-			var template = Zippr(templateString);
+			var template = Wzhik(templateString);
 			// Executing template
 			var result = template({arr : [1,2,3,4,5]});
 			// Expected result
@@ -123,7 +123,7 @@ describe('Zippr has cool buit-in syntax shortcodes', function() {
 				"{{ endeach }}"
 			].join("");
 			// Compiling template string to template function
-			var template = Zippr(templateString);
+			var template = Wzhik(templateString);
 			// Executing template
 			var result = template({arr : ['a','b','c']});
 			// Expected result
@@ -160,7 +160,7 @@ describe('Zippr has cool buit-in syntax shortcodes', function() {
 				"{{ endeach }}"
 			].join("");
 			// Compiling template string to template function
-			var template = Zippr(templateString);
+			var template = Wzhik(templateString);
 			// Executing template
 			var result = template({arr : [1,2,3,4,5]});
 			// Expected result
@@ -178,7 +178,7 @@ describe('Zippr has cool buit-in syntax shortcodes', function() {
 				"{{ endeach }}"
 			].join("");
 			// Compiling template string to template function
-			var template = Zippr(templateString);
+			var template = Wzhik(templateString);
 			// Executing template
 			var result = template({arr : [1,2,3,4,5]});
 			// Expected result
@@ -200,7 +200,7 @@ describe('Zippr has cool buit-in syntax shortcodes', function() {
 				"{{ endeach }}"
 			].join("");
 			// Compiling template string to template function
-			var template = Zippr(templateString);
+			var template = Wzhik(templateString);
 			// Executing template
 			var result = template({
 				hello : 1,
@@ -228,7 +228,7 @@ describe('Zippr has cool buit-in syntax shortcodes', function() {
 				"{{ endeach }}"
 			].join("");
 			// Compiling template string to template function
-			var template = Zippr(templateString);
+			var template = Wzhik(templateString);
 			// Executing template
 			var result = template( data );
 			// Expected result
@@ -244,12 +244,12 @@ describe('Zippr has cool buit-in syntax shortcodes', function() {
 		// 	arr2: [4,5,6]
 		// }
 		// it('forEach alias', function(){
-		// 	tpl = Zippr("{{ forEach(data.arr, i) }}{{= i }}{{ forEach(data.arr2, j) }}{{= j }}{{ endeach }}{{ endeach }}")( data );
+		// 	tpl = Wzhik("{{ forEach(data.arr, i) }}{{= i }}{{ forEach(data.arr2, j) }}{{= j }}{{ endeach }}{{ endeach }}")( data );
 		// 	assert.equal(tpl, "145624563456");
 		// });
 
 		// it('each break', function(){
-		// 	tpl = Zippr("{{ each(data.arr, a) { }}{{= a }}{{ return false }}{{ endeach }}")(data);
+		// 	tpl = Wzhik("{{ each(data.arr, a) { }}{{= a }}{{ return false }}{{ endeach }}")(data);
 		// 	assert.equal(tpl, "1");
 		// });
 
@@ -262,15 +262,15 @@ describe('Zippr has cool buit-in syntax shortcodes', function() {
 	describe('Include function', function() {
 
 		it('Simple include', function(){
-			// Zippr passes 2 arguments
+			// Wzhik passes 2 arguments
 			// The first - script element id or template text
 			// The second - template name
 			// So, "hello-inc" is compiled, stored and ready to use
-			Zippr("Hello",  "hello-inc" );
+			Wzhik("Hello",  "hello-inc" );
 			// Include compiled template hello-inc
 			var templateString = "{{ include hello-inc }}, World!";
 			// Compiling template with include statement and hello-world-inc id
-			var template = Zippr(templateString, "hello-world-inc");
+			var template = Wzhik(templateString, "hello-world-inc");
 			// 
 			var expected = "Hello, World!";
 			// result
@@ -281,10 +281,10 @@ describe('Zippr has cool buit-in syntax shortcodes', function() {
 
 		it('Multiple and nested includes', function(){
 			// including hello-world-inc compiled above
-			Zippr("{{ include hello-world-inc }} I'm rich", "rich-inc");
+			Wzhik("{{ include hello-world-inc }} I'm rich", "rich-inc");
 			// new template with include
 			var templateString = "{{ include rich-inc }}!";
-			var template = Zippr(templateString);
+			var template = Wzhik(templateString);
 			var expected = "Hello, World! I'm rich!";
 			// result
 			var result = template();
@@ -294,17 +294,17 @@ describe('Zippr has cool buit-in syntax shortcodes', function() {
 
 
 		// it('include inside include inside each', function(){
-		// 	tpl = Zippr("{{each(data.arr)}}{{ include inc3 }}\n{{ endeach }}")({arr : [1,2,3]});
+		// 	tpl = Wzhik("{{each(data.arr)}}{{ include inc3 }}\n{{ endeach }}")({arr : [1,2,3]});
 		// 	assert.equal(tpl, "Hello, World!\nHello, World!\nHello, World!\n");
 
-		// 	tpl = Zippr("Hi, {{= name }}<br />", "hitpl");
-		// 	var tpl2 = Zippr([
-		// 		"{{ var names = ['john', 'jack', 'zippr'] }}",
+		// 	tpl = Wzhik("Hi, {{= name }}<br />", "hitpl");
+		// 	var tpl2 = Wzhik([
+		// 		"{{ var names = ['john', 'jack', 'wzhik'] }}",
 		// 		"{{ each(names, name) }}",
 		// 			"{{ include hitpl }}",
 		// 		"{{ endeach }}"
 		// 	].join(""))();
-		// 	assert.equal(tpl2, "Hi, john<br />Hi, jack<br />Hi, zippr<br />");
+		// 	assert.equal(tpl2, "Hi, john<br />Hi, jack<br />Hi, wzhik<br />");
 		// });
 
 	});
@@ -318,7 +318,7 @@ describe('Zippr has cool buit-in syntax shortcodes', function() {
 			expect = "Parent Header (i am parent) Parent footer";
 			expect2 = "Parent Header (i am child) Parent footer";
 
-			tpl = Zippr([
+			tpl = Wzhik([
 				"Parent Header (",
 				"{{ block content }}",
 					"i am parent",
@@ -329,7 +329,7 @@ describe('Zippr has cool buit-in syntax shortcodes', function() {
 
 			assert.equal( tpl, expect );
 
-			tpl2 = Zippr([
+			tpl2 = Wzhik([
 				"{{ extends parenttpl1 }}",
 				"{{ block content }}",
 					"i am child",
@@ -346,7 +346,7 @@ describe('Zippr has cool buit-in syntax shortcodes', function() {
 			expect = "Parent Header Parent content Parent footer";
 			expect2 = "Parent Header xz Parent footer";
 
-			tpl = Zippr([
+			tpl = Wzhik([
 				"{{ block header }}",
 					"Parent Header ",
 				"{{ endblock }}",
@@ -361,7 +361,7 @@ describe('Zippr has cool buit-in syntax shortcodes', function() {
 
 			assert.equal( tpl, expect );
 
-			tpl2 = Zippr([
+			tpl2 = Wzhik([
 				"{{ extends parenttpl2 }}",
 				"{{ block content }}{{= data.x }} {{ endblock }}",
 			].join(""), "childtpl2")({x : "xz"});

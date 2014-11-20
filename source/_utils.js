@@ -17,7 +17,7 @@ if( SUPPORT_FILTERS ) {
 		t2	= /</g,
 		sl 	= /\//g;
 
-	Zippr['e'] = _filters["escape"] = function( code ) {
+	Wzhik['e'] = _filters["escape"] = function( code ) {
 		return isChrome
 			? code
 				.replace(amp, '&amp;')
@@ -29,10 +29,10 @@ if( SUPPORT_FILTERS ) {
 			: (DOMtext.nodeValue = code) && DOMelement.innerHTML;
 	}
 
-	Zippr['f'] = _filters;
-	Zippr['addFilter'] = function(name, fn){
+	Wzhik['f'] = _filters;
+	Wzhik['addFilter'] = function(name, fn){
 		_filters[name] = fn;
-		return Zippr
+		return Wzhik
 	}
 }
 
@@ -45,7 +45,7 @@ if( IGNORE_NULLS ) {
 	// v(false) === ""
 	// v(undefined) === ""
 	// v(0) === 0
-	Zippr['v'] = function( value, templateID, lineNumber ){
+	Wzhik['v'] = function( value, templateID, lineNumber ){
 		if( DEBUG ) {
 			if( lineNumber ) {
 				if( value === undefined ) {
@@ -67,7 +67,7 @@ if( IGNORE_NULLS ) {
 
 // @todo perf test: array detection vs 2 functions for object and array
 // Each function
-Zippr["each"] = function(subject, fn){
+Wzhik["each"] = function(subject, fn){
 	for(
 		var index = -1,
 			isarr = subject instanceof Array,

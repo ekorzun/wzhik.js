@@ -1,8 +1,8 @@
-describe('Zippr can pzdc', function(){
+describe('Wzhik can pzdc', function(){
 
 	it('should return empty string if empty string passed', function(){
 		// Compiling empty string
-		var template = Zippr("#test-simple");
+		var template = Wzhik("#test-simple");
 		var data = {arr : [1,2,3], "xxx" : "OOO"}
 		template( data );
 	});
@@ -21,7 +21,7 @@ describe('Zippr can pzdc', function(){
 	// 		]
 	// 	}
 	// 	// Compiling empty string
-	// 	var template = Zippr("#test-recursive");
+	// 	var template = Wzhik("#test-recursive");
 	// 	template( data );
 	// });
 

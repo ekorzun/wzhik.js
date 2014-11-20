@@ -39,7 +39,7 @@ function compileTemplateString(str, name, isPartial ){
 			// compiledLines[compiledLinesIndex++] = OUTPUT_VAR + '.push(' + '"<!--' + v[0] + '-->");';
 			compiledLines[compiledLinesIndex++] = (
 				"var " + arr + "=" + v[0] +
-				";Zippr.each(" + arr + ",function(" + item + "," + iter + "," + item + "_isFirst," + item + "_isLast," + item + "_isEven" + "){"
+				";Wzhik.each(" + arr + ",function(" + item + "," + iter + "," + item + "_isFirst," + item + "_isLast," + item + "_isEven" + "){"
 				// var a1 = data.array,
 				// "var " + arr + "=" + v[0] + 
 				// ";for(var " + iter + "=0," + item + "," + len + "=" + arr + ".length;" +

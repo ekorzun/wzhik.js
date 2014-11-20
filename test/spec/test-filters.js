@@ -1,10 +1,10 @@
-describe('Zippr has cool filters', function() {
+describe('Wzhik has cool filters', function() {
 
 	var tpl, exp;
 
 	describe('escaping', function() {
 		it("should escape", function(){
-			tpl = Zippr("{{- data.str }}")({str : "&"});
+			tpl = Wzhik("{{- data.str }}")({str : "&"});
 			assert.equal(tpl, "&amp;");
 		});
 	});
@@ -14,28 +14,28 @@ describe('Zippr has cool filters', function() {
 		it('plural', function() {
 			var data = {n1: 1, n2: 2, n3: 3, n4: 5, n5: 11, n6: 22, n7: 33, n8: 0, cows : "korova,korovy,korov" }
 
-			tpl = Zippr("{{= 1 |plural(data.cows) }}")( data );
+			tpl = Wzhik("{{= 1 |plural(data.cows) }}")( data );
 			assert.equal(tpl, "1 korova");
 
-			tpl = Zippr("{{= 2 |plural(data.cows) }}")( data );
+			tpl = Wzhik("{{= 2 |plural(data.cows) }}")( data );
 			assert.equal(tpl, "2 korovy");
 
-			tpl = Zippr("{{= data.n3 |plural(data.cows) }}")( data );
+			tpl = Wzhik("{{= data.n3 |plural(data.cows) }}")( data );
 			assert.equal(tpl, "3 korovy");
 
-			tpl = Zippr("{{= data.n4|plural(data.cows) }}")( data );
+			tpl = Wzhik("{{= data.n4|plural(data.cows) }}")( data );
 			assert.equal(tpl, "5 korov");
 
-			tpl = Zippr("{{= data.n5 |plural(data.cows) }}")( data );
+			tpl = Wzhik("{{= data.n5 |plural(data.cows) }}")( data );
 			assert.equal(tpl, "11 korov");
 
-			tpl = Zippr("{{= data.n6 |plural(data.cows) }}")( data );
+			tpl = Wzhik("{{= data.n6 |plural(data.cows) }}")( data );
 			assert.equal(tpl, "22 korovy");
 
-			tpl = Zippr("{{= data.n7 |plural(data.cows) }}")( data );
+			tpl = Wzhik("{{= data.n7 |plural(data.cows) }}")( data );
 			assert.equal(tpl, "33 korovy");
 
-			tpl = Zippr("{{= data.n8 |plural(data.cows) }}")( data );
+			tpl = Wzhik("{{= data.n8 |plural(data.cows) }}")( data );
 			assert.equal(tpl, "0 korov");
 		});
 
@@ -54,13 +54,13 @@ describe('Zippr has cool filters', function() {
 
 			for(var k in map ) {
 				t = k.split(" - ");
-				tpl = Zippr("{{= data.n |numberFormat"+(map[k] ? ("(" + map[k] + ")") : "")+" }}")({n: (t[0])});
+				tpl = Wzhik("{{= data.n |numberFormat"+(map[k] ? ("(" + map[k] + ")") : "")+" }}")({n: (t[0])});
 				assert.equal(tpl, t[1]);
 			}
 		});
 
 		it('date', function() {
-			tpl = Zippr("{{= data.timestamp |date('d.m.Y') }}")({timestamp: +new Date("12 nov 2014") / 1000});
+			tpl = Wzhik("{{= data.timestamp |date('d.m.Y') }}")({timestamp: +new Date("12 nov 2014") / 1000});
 			assert.equal(tpl, "12.11.2014");
 		});
 
