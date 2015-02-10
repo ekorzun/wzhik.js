@@ -1,0 +1,97 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Wzhik Tests</title>
+	<link rel="stylesheet" href="vendor/mocha.css" />
+	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/default.min.css">
+	<style>
+		.hljs {background: transparent;}
+		/*ul .suite:first-child pre {display: block !important;}*/
+	</style>
+</head>
+<body>
+
+	<div id="hello" style="display: none">
+		<h1>{{= data.greetings }}</h1>
+	</div>
+
+	<div id="test-update" style="display:none">
+		<span>{{= data.name }} {{= data.lastname }}</span>
+		<div class="{{= data.class }}">{{= Math.round(data.rand) }}</div>
+		{{ if (data.items) }}
+			<ul>
+				{{ each( data.items ) }}
+					<li>{{= item }}</li>
+				{{ endeach }}
+			</ul>
+		{{ end }}
+	</div>
+
+	<div id="mocha"></div>
+
+	<!-- browser test -->
+
+	<script type="text/tpl" id="test-simple">
+		<div>
+			<p>
+				<img src="{{=  window.asd() }}" alt="{{= xz }}">
+			</p>
+			<p>
+				<img src="{{=  xz }}" alt="">
+			</p>
+		</div>
+		<a href="#" title="">{{= undef1 }}</a>
+		{{ each( data.arr ) }}
+			{{= item }}
+		{{ endeach }}
+	</script>
+
+
+
+	<!-- /browser test -->
+
+	<script src="http://code.jquery.com/jquery-2.1.1.js"></script>
+
+
+
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+	<script src="./vendor/jsbeautifer.js"></script>
+	<script src="./vendor/expect.js"></script>
+	<script src="./vendor/mocha.js"></script>
+	<script>
+		this.assert = chai.assert;
+		mocha.setup("bdd");
+		// (function(){
+		// 	var script = document.createElement("script");
+		// 	location.href.indexOf("?cover") > -1
+		// 	script.src =  ? "" : "";
+		// })();
+		// if( ) {
+		// 	document.write('<s'+'cript src="./vendor/blanket.js"></s'+'cript>');
+		// 	document.write('<s'+'cript src="./compiled/wzhik.full.js" data-cover></s'+'cript>');
+		// } else {
+		// 	document.write('');
+		// }
+	</script>
+
+	<script src="./dist/wzhik.dev.js"></script>
+	<script src="./dist/wzhik.filters.js" data-cover></script>
+
+	<script src="./test/spec/test-basics.js"></script>
+	<script src="./test/spec/test-syntax.js"></script>
+	<script src="./test/spec/test-filters.js"></script>
+	<script src="./test/spec/test-browser.js"></script>
+	<script src="./test/spec/test-noneed.js"></script>
+
+	<script>
+			mocha.noHighlighting();
+			mocha.checkLeaks();
+		    mocha.globals(['jQuery']);
+		    mocha.run(function(){
+		    	$('pre code').each(function(i, block) {
+    				hljs.highlightBlock(block);
+  				});
+		    });
+	</script>
+</body>
+</html>
