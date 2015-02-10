@@ -230,7 +230,6 @@
 
 	if(SUPPORT_EXPERIMENTAL) {
 		//= "_experimental.js"
-		//= "_observe.js"
 	}
 
 
