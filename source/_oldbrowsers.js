@@ -30,3 +30,5 @@ if(SUPPORT_OLD_BROWSERS && !String.prototype.trim) {
 	    return str.substring(i, ++j);
 	}
 }
+
+

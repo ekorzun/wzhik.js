@@ -1,9 +1,9 @@
 
 //
 //
-function parseTemplateString( templateString, name){
+function parseTemplateString( templateString, name, isPartial){
 
-	var parsedLinesIndex;
+	var parsedLinesIndex = 0;
 	var parsedLines;
 	var tokens = templateString.split( CLOSE_TAG );
 
@@ -64,25 +64,29 @@ function parseTemplateString( templateString, name){
 
 	} else {
 
-		// Wzhik doesnt support extending, so we use default code
-		parsedLinesIndex = 1;
+		if( !isPartial ) {
+			// Wzhik doesnt support extending, so we use default code
+			parsedLinesIndex = 1;
 
-		// if( DEBUG ) {
-			
-		// 	parsedLines = {
-		// 		0 : {
-		// 			operator: KEY_JS,
-		// 			_code : CODE_FIRST 
-		// 		}
-		// 	}
-		// } else {
-			parsedLines = {
-				0 : {
-					operator: KEY_JS,
-					_code : CODE_FIRST
+			// if( DEBUG ) {
+				
+			// 	parsedLines = {
+			// 		0 : {
+			// 			operator: KEY_JS,
+			// 			_code : CODE_FIRST 
+			// 		}
+			// 	}
+			// } else {
+				parsedLines = {
+					0 : {
+						operator: KEY_JS,
+						_code : CODE_FIRST
+					}
 				}
-			}
-		// }
+			// }
+		} else {
+			parsedLines = {};
+		}
 	}
 
 	// console.log( tokens )
@@ -105,18 +109,16 @@ function parseTemplateString( templateString, name){
 			var debugline = tokens[tokenIndex].split(/\n/);
 			if( debugline.length > 1 ) {
 				debugline.forEach(function(ln){
-					// console.log({
-					// 	ln : ln,
-					// 	orig : getOriginalLine(ln, name), 
-					// 	line : line,
-					// 	parse :parsedLinesIndex
-					// });
-				
-					_cacheParsingDebug[name].push({parsed :parsedLinesIndex, original:  getOriginalLine(ln, name)});
+					_cacheParsingDebug[name].push({
+						parsed : parsedLinesIndex,
+						original: getOriginalLine(ln, name)
+					});
 				});
 			} else {
-				_cacheParsingDebug[name].push({parsed :parsedLinesIndex, original:  getOriginalLine(debugline, name)});
-				// _cacheParsingDebug[name].push(line);
+				_cacheParsingDebug[name].push({
+					parsed : parsedLinesIndex,
+					original:  getOriginalLine(debugline, name)
+				});
 			}
 		}
 
@@ -130,7 +132,10 @@ function parseTemplateString( templateString, name){
 		if( l[0] !== ''){
 			
 			if( DEBUG ) {
-				_cacheParsingDebug[name].push({parsed :parsedLinesIndex, original:  getOriginalLine(l[0], name)});
+				_cacheParsingDebug[name].push({
+					parsed :parsedLinesIndex,
+					original:  getOriginalLine(l[0], name)
+				});
 			}
 
 			parsedLines[parsedLinesIndex++] = {
@@ -142,7 +147,10 @@ function parseTemplateString( templateString, name){
 		var code = l[1];
 
 		if( DEBUG ) {
-			_cacheParsingDebug[name].push({parsed :parsedLinesIndex, original:  getOriginalLine(l[1], name)});
+			_cacheParsingDebug[name].push({
+				parsed : parsedLinesIndex,
+				original:  getOriginalLine(l[1], name)
+			});
 		}
 
 		if( code ){
@@ -265,7 +273,7 @@ function parseTemplateString( templateString, name){
 	}
 
 	if( SUPPORT_EXTENDS ) {
-		if( !extended ) {
+		if( !extended && !isPartial ) {
 			parsedLines[parsedLinesIndex++] = {
 				operator : KEY_JS,
 				_code : CODE_LAST
@@ -275,10 +283,13 @@ function parseTemplateString( templateString, name){
 			parsedLines.len = parsedLinesIndex;
 		}
 	} else {
-		parsedLines[parsedLinesIndex++] = {
-			operator : KEY_JS,
-			_code : CODE_LAST
+		if( !isPartial ) {
+			parsedLines[parsedLinesIndex++] = {
+				operator : KEY_JS,
+				_code : CODE_LAST
+			}
 		}
+
 		parsedLines.len = parsedLinesIndex;
 	}
 
@@ -323,6 +334,7 @@ if( SUPPORT_SHORTCODES ) {
 			if( code.indexOf("{") < 0 ) {
 				code += "{";
 			}
+			
 			return {
 				operator : KEY_JS,
 				_code : code
