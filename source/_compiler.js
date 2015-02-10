@@ -3,22 +3,25 @@
 function compileTemplateString(str, name, isPartial ){
 
 	var parsedLines = parseTemplateString(str, name);
-	var parsedLinesIndex = parsedLines.len;
-	var compiledLines = Array(parsedLinesIndex);
+	var parsedLinesLength = parsedLines.len;
+	var compiledLines = Array(parsedLinesLength);
 	var compiledLinesIndex = 0;
 	var lastOperator,line, operator;
 
-	// console.log(_cacheParsingDebug[name], parsedLinesIndex )
+	// console.log(_cacheParsingDebug[name], parsedLinesLength )
 
-	for(var i = -1, l = parsedLinesIndex; ++i < l;){
+	for(var parsedLineIndex = -1; ++parsedLineIndex < parsedLinesLength;){
 
-		line = parsedLines[i];
+		line = parsedLines[parsedLineIndex];
 		operator = line.operator;
 
 		if( lastOperator !== operator || operator === KEY_JS)
 			compiledLines[compiledLinesIndex++] = ';';
 
 		var v = line._code;
+
+		// @todo
+		// compiledLines[compiledLinesIndex++] = operatorList[ operator ]( line._code );
 
 		// Plain javascript
 		if(operator === KEY_JS){
@@ -38,15 +41,8 @@ function compileTemplateString(str, name, isPartial ){
 			// 
 			// compiledLines[compiledLinesIndex++] = OUTPUT_VAR + '.push(' + '"<!--' + v[0] + '-->");';
 			compiledLines[compiledLinesIndex++] = (
-				"var " + arr + "=" + v[0] +
-				";Wzhik.each(" + arr + ",function(" + item + "," + iter + "," + item + "_isFirst," + item + "_isLast," + item + "_isEven" + "){"
-				// var a1 = data.array,
-				// "var " + arr + "=" + v[0] + 
-				// ";for(var " + iter + "=0," + item + "," + len + "=" + arr + ".length;" +
-				// 	iter + "<" + len + ";" + iter + "++){" + item + "=" + arr + "[" + iter + "];" + 
-				// 	"var " + item + "_isFirst=(" + iter + "==0)," + 
-				// 			 item + "_isLast=(" + iter + "=="+len+"-1)," + 
-				// 			 item + "_isEven=(" + iter + "%2)"
+				OUTPUT_OPETATOR_VAR + " " + arr + "=" + v[0] + ";"
+				+ WZHIK_NAME+ ".each(" + arr + ",function(" + item + "," + iter + "," + item + "_isFirst," + item + "_isLast," + item + "_isEven" + "){"
 			);
 
 		// Block operator
@@ -57,7 +53,7 @@ function compileTemplateString(str, name, isPartial ){
 		} else {
 
 			if( DEBUG ) {
-				var origline = getOriginalLineFromParsedIndex(i, name);
+				var origline = getOriginalLineFromParsedIndex(parsedLineIndex, name);
 				if( origline ) {
 					compiledLines[compiledLinesIndex++] = "try{";
 				}
@@ -68,10 +64,11 @@ function compileTemplateString(str, name, isPartial ){
 				if ( DEBUG ) {
 					var variable = v;
 
-					if( SUPPORT_EXPERIMENTAL && v.charAt(0) !== "'" ) {
+					if( false && SUPPORT_EXPERIMENTAL && v.charAt(0) !== "'" ) {
 						// @todo ?
 						v = v.trim();
-						var variableComment = '"<!--' + v + '-->"';
+						// var variableComment = '"<!--' + v + '-->"';
+						var variableComment = "'&#8203;'";
 						variable = variableComment + "+" + v;
 					}
 
@@ -114,15 +111,15 @@ function compileTemplateString(str, name, isPartial ){
 
 				if(lastOperator !== OPERATOR_ECHO){
 					if( IGNORE_NULLS ) {
-						compiledLines[compiledLinesIndex++] = (OUTPUT_VAR + '+=') + v;
+						compiledLines[compiledLinesIndex++] = (OUTPUT_VAR + OUTPUT_OPETATOR_EXT_CONCAT) + v;
 					} else {
-						compiledLines[compiledLinesIndex++] = (OUTPUT_VAR + '+=') + '(' + v + ')';
+						compiledLines[compiledLinesIndex++] = (OUTPUT_VAR + OUTPUT_OPETATOR_EXT_CONCAT) + '(' + v + ')';
 					}
 				} else {
 					if( IGNORE_NULLS ) {
-						compiledLines[compiledLinesIndex++] = '+' + v;
+						compiledLines[compiledLinesIndex++] = OUTPUT_OPETATOR_CONCAT + v;
 					} else {
-						compiledLines[compiledLinesIndex++] = '+(' + v + ')';
+						compiledLines[compiledLinesIndex++] = OUTPUT_OPETATOR_CONCAT + '(' + v + ')';
 					}
 					
 				}
@@ -135,14 +132,17 @@ function compileTemplateString(str, name, isPartial ){
 
 
 	if( DEBUG ) {
+		// debugger template ID
 		compiledLines.unshift("var _t"+(TUID++)+"='"+name+"';");
 
 		var compiled = compiledLines.join('\n');
 
-		try {
-			console.log("Compiled function: ", js_beautify(compiled));
-		} catch(e) {
-			console.log("Compiled function: ", compiled);
+		if( DEBUG_PRINT_COMPILED ) {
+			try {
+				console.log("Compiled function: ", js_beautify(compiled));
+			} catch(e) {
+				console.log("Compiled function: ", compiled);
+			}
 		}
 
 		return compiled;
