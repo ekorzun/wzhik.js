@@ -4,13 +4,21 @@
 // COMPILATION FLAGS
 // ------------------------------------------------------------------------------------------------
 
+// Browser enviroment = true
+// server enviroment = false
+// For TEST ONLY. It doesnt work in server
+/** @define {boolean} */	var WZHIK_BROWSER_ENV = true;
+
 // Debug information
 // error detection
 // formatted template sources etc.
-/** @define {boolean} */	var DEBUG = true;
+/** @define {boolean} */	var DEBUG = false;
+
+// 
+/** @define {boolean} */	var DEBUG_PRINT_COMPILED = false;
 
 // Global variable name
-/** @define {string} */		var WZHIK_NAME = "Wzhik";
+/** @define {string} */		var WZHIK_NAME = "wzhik";
 
 // 
 /** @define {boolean} */	var AUTOCOMPILE = true;
@@ -19,16 +27,18 @@
 /** @define {boolean} */	var IGNORE_NULLS = true;
 
 
-// ------------------------------------------------------------------------------------------------
+
 // ------------------------------------------------------------------------------------------------
 // ****************************************** NERD MODE *******************************************
-// ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
 
 // SYNTAX OPTS
 // ------------------------------------------------------------------------------------------------
+
+// It is not recommended to use this setting
 /** @define {boolean} */	var USE_WITH = false;
+
 /** @define {string} */		var OPEN_TAG = "{{";
 /** @define {string} */		var CLOSE_TAG = "}}";
 /** @define {string} */		var OPERATOR_ECHO = "=";
@@ -48,16 +58,36 @@
 
 // 
 // ------------------------------------------------------------------------------------------------
-/** @define {boolean} */	var SUPPORT_EXPERIMENTAL = false;
+/** @define {boolean} */	var SUPPORT_EXPERIMENTAL = true;
 
 
-+function(root){
+// 
+// MULTI LANGUAGE/TEMPLATE SUPPORT
+// These options are configured for using with javascript
+// NOTE: You have to turn DEBUG off for making changes
+// ------------------------------------------------------------------------------------------------
+/** @define {string} */		var OUTPUT_OPETATOR_CONCAT = "+";
+/** @define {string} */		var OUTPUT_OPETATOR_EXT_CONCAT = "+=";
+/** @define {string} */		var OUTPUT_OPETATOR_VAR = "var";
+/** @define {string} */		var OUTPUT_OPETATOR_ASSIGN = "=";
+/** @define {string} */		var OUTPUT_VAR_PREFIX = ""; // ex. $
 
-	var server = (typeof exports !== 'undefined');
 
+
++function(root, server, $){
+
+	if( !$ ) {
+		$ = document.querySelector;
+	}
+
+	// 
+	// 
 	// Simple increment ID for for tpl/patrial etc.
 	var UID = 0;
 
+	// 
+	// 
+	// 
 	if( DEBUG ) {
 		var TUID = 0;
 	}
@@ -67,7 +97,10 @@
 	// http://jsperf.com/js-exec-vs-match/2
 	var _RegExp = server ? RegExp : root['RegExp'];
 
+
+	// 
 	// Operators codes
+	// 
 	var KEY_JS = 1,
 		KEY_FOR = 2,
 		KEY_BLOCK = 3,
@@ -75,6 +108,8 @@
 		KEY_ECHO = 5,
 		KEY_ESCAPE = 6;
 
+	// 
+	// 
 	// Cache indexes
 	var 
 		_cacheCompiled = {},
@@ -83,42 +118,599 @@
 		_cacheParsing = {},
 		_cachePartialsIndex = {};
 
+	
+	// 
+	// 
 	// First and last lines of compiled tpl
 	var 
 		CODE_FIRST, 
 		CODE_LAST = "return " + OUTPUT_VAR;
 
 
-	// It is possible to use Wzhik in Underscore's style
+	// 	
+	// It is possible but not recommended to use Wzhik in underscore's style
 	// E.g.  {someProp: 2} => someProp
-	// It is not recommended to use this setting
-	// http://www.2ality.com/2011/06/with-statement.html
 	if( USE_WITH ) {
 
-		// @todo Try to replace "With" with real(?) local vars
+		// 
+		// Try to replace "With" with real(?) local vars
+		// updt: local vars tested. "With" works better :/
 		CODE_FIRST = 
-			(IGNORE_NULLS ? "var _v=" + WZHIK_NAME + ".v," : "var")
-			+ OUTPUT_VAR + "=" + (DEBUG ? "[]" : "''")
+			(IGNORE_NULLS ? OUTPUT_OPETATOR_VAR + " _v=" + WZHIK_NAME + ".v," : OUTPUT_OPETATOR_VAR)
+			+ OUTPUT_VAR_PREFIX + OUTPUT_VAR + "=" + (DEBUG ? "[]" : "''")
 			+ ";with(" + INPUT_VAR + "){";
-
 		CODE_LAST  = "} " + CODE_LAST;
 
 	} else {
 
 		CODE_FIRST = 
-			(IGNORE_NULLS ? "var _v=" + WZHIK_NAME + ".v," : "var")
-			+ OUTPUT_VAR + "=" + (DEBUG ? "[]" : "''");
+			(IGNORE_NULLS ? OUTPUT_OPETATOR_VAR + " _v=" + WZHIK_NAME + ".v," : OUTPUT_OPETATOR_VAR)
+			+ OUTPUT_VAR_PREFIX + OUTPUT_VAR + "=" + (DEBUG ? "[]" : "''");
 	}
 
 
 	// 
+	// 
+	// 
 	if( DEBUG ) {
-		// CODE_FIRST = "try{" + CODE_FIRST;
-		// CODE_LAST = (USE_WITH ? "}" : "") + "}catch(e){console.error(e.message);};" + "return " + OUTPUT_VAR + (DEBUG ? ".join('')" : "");
-		CODE_FIRST += ",_d=" + WZHIK_NAME + ".debug";
-		CODE_LAST = (USE_WITH ? "}" : "") + "return " + OUTPUT_VAR + (DEBUG ? ".join('')" : "");
+		CODE_FIRST += "," + OUTPUT_VAR_PREFIX + "_d=" + WZHIK_NAME + ".debug";
+		CODE_LAST = (USE_WITH ? "}" : "") + "return " + OUTPUT_VAR_PREFIX + OUTPUT_VAR + (DEBUG ? ".join('')" : "");
 	}
 
+
+	var Wzhik = function (templateString, templateID, isPartial ){
+
+		if(templateString.charAt(0) === "#"){
+			templateID = templateString;
+			if( WZHIK_BROWSER_ENV ) {
+				if( DEBUG ) {
+					var element = document.getElementById(templateString.substr(1));
+					if( !element ) {
+						console.error("The is no element with ID ", templateString);
+					}
+					templateString = element.innerHTML;
+				} else {
+					templateString = document.getElementById(templateString.substr(1)).innerHTML;
+				}
+			} else {
+				// TEST ONLY
+				// templateString = String(
+				// 	fs.readFileSync(
+				// 		path.join(
+				// 			__dirname,
+				// 			"../../" + Wzhik['cwd'] + "/" + templateString.substr(1) + ".html")
+				// 	)
+				// );
+			}
+		}
+
+		!templateID && (templateID = ("t" + UID++));
+
+		// if(templateID && _cacheCompiled[templateID])
+		// 	return _cacheCompiled[templateID];
+
+		if(_cacheCompiledByTpl[templateString])
+			return _cacheCompiledByTpl[templateString];
+
+		if( DEBUG ) {
+			if( console.groupCollapsed ) {
+				console.groupCollapsed( "Template: " + templateID );
+			} else {
+				console.group( "Template: " + templateID );
+			}
+		}
+
+		var compiledString = compileTemplateString(templateString, templateID, isPartial);
+
+		if( DEBUG ) {
+			console.groupEnd("Template: " + templateID);
+		}
+
+		var fn = new Function(INPUT_VAR, compiledString),
+			template = new Template(templateID, fn);
+
+		_cacheCompiledByTpl[templateString] = template;
+
+		if(templateID && !_cacheCompiled[templateID]){
+			// _cacheCompiled[templateID] = fn;
+			_cacheCompiled[templateID] = compiledString;
+		}
+
+		return template;
+    }
+
+
+    // 
+	// 
+	// 
+	function Template( templateID, render ){
+		this.id = templateID;
+		this['render'] = render;
+	}
+
+	if(SUPPORT_EXPERIMENTAL) {
+		
+		
+		
+		
+		var 
+		    ELEMENT = "element",
+		    NAME = "name",
+		    VALUE = "value",
+		    TEXT = "text",
+		    ATTRIBUTES = "attributes",
+		    NODE_NAME = "nodeName",
+		    COMMENT = "comment",
+		    CHILD_NODES = "childNodes",
+		    CHECKED = "checked",
+		    SELECTED = "selected",
+		    CLASS_NAME = "className";
+		
+		var _attrMap = {
+		    "selected" : 1,
+		    "value"  : 1,
+		    "checked" : 1,
+		    "id" : 1,
+		    "data" : 1,
+		    "className" : 1
+		},
+		
+		 _attrRMap = {
+		    "text" : "data"
+		}
+		
+		
+		
+		// 
+		// 
+		// 
+		function Diff(kind, path, value, origin, index, item ) {
+		    this.kind = kind;
+		    path && (this._path = path);
+		    origin !== undefined && (this.lhs = origin);
+		    value !== undefined && (this.rhs = value);
+		    index && (this.index = index);
+		    item && (this.item = item);
+		}
+		
+		
+		// 
+		// 
+		// 
+		function diffArrayRemove(arr, from, to) {
+		    var rest = arr.slice((to || from) + 1 || arr.length);
+		    arr.length = from < 0 ? arr.length + from : from;
+		    arr.push.apply(arr, rest);
+		    return arr;
+		}
+		
+		
+		// 
+		// 
+		// 
+		function realTypeOf(subject) {
+		    var type = typeof subject;
+		    if (type !== 'object') {
+		        return type;
+		    }
+		
+		    return (
+		        (subject === null && 'null') 
+		        || (isArray(subject) && 'array')
+		        || (subject instanceof Date && 'date')
+		        || (/^\/.*\//.test(subject.toString()) && 'regexp')
+		        || 'object'
+		    );
+		}
+		
+		
+		// 
+		// 
+		// 
+		function deepDiff(lhs, rhs, changes, prefilter, path, key, stack) {
+		    path = path || [];
+		    var currentPath = path.slice(0);
+		    if (typeof key !== 'undefined') {
+		        if (prefilter && prefilter(currentPath, key)) {
+		            return;
+		        }
+		        currentPath.push(key);
+		    }
+		    var ltype = typeof lhs;
+		    var rtype = typeof rhs;
+		    if (ltype === 'undefined') {
+		        if (rtype !== 'undefined') {
+		            changes(new Diff("N", currentPath, rhs));
+		        }
+		    } else if (rtype === 'undefined') {
+		        changes(new DiffDeleted("D", currentPath, undefined, lhs));
+		    } else if (realTypeOf(lhs) !== realTypeOf(rhs)) {
+		        changes(new Diff("E", currentPath, rhs, lhs));
+		    } else if (lhs instanceof Date && rhs instanceof Date && ((lhs - rhs) !== 0)) {
+		        changes(new Diff("E", currentPath, rhs, lhs));
+		    } else if (ltype === 'object' && lhs !== null && rhs !== null) {
+		        stack = stack || [];
+		        if (stack.indexOf(lhs) < 0) {
+		            stack.push(lhs);
+		            if (isArray(lhs)) {
+		                var i, len = lhs.length;
+		                for (i = 0; i < lhs.length; i++) {
+		                    if (i >= rhs.length) {
+		                        changes(new DiffArray("A", currentPath, undefined, undefined, i, new DiffDeleted("D", undefined, undefined, lhs[i])));
+		                    } else {
+		                        deepDiff(lhs[i], rhs[i], changes, prefilter, currentPath, i, stack);
+		                    }
+		                }
+		                while (i < rhs.length) {
+		                    changes(new DiffArray("A", currentPath, undefined, undefined, i, new Diff("N", undefined, rhs[i++])));
+		                }
+		            } else {
+		                var akeys = Object.keys(lhs);
+		                var pkeys = Object.keys(rhs);
+		
+		                Wzhik.each(akeys, function(k, i) {
+		                    var other = pkeys.indexOf(k);
+		                    if (other >= 0) {
+		                        deepDiff(lhs[k], rhs[k], changes, prefilter, currentPath, k, stack);
+		                        pkeys = diffArrayRemove(pkeys, other);
+		                    } else {
+		                        deepDiff(lhs[k], undefined, changes, prefilter, currentPath, k, stack);
+		                    }
+		                });
+		
+		                Wzhik.each(pkeys, function(k) {
+		                    deepDiff(undefined, rhs[k], changes, prefilter, currentPath, k, stack);
+		                });
+		            }
+		            stack.length = stack.length - 1;
+		        }
+		    } else if (lhs !== rhs) {
+		        if (!(ltype === "number" && isNaN(lhs) && isNaN(rhs))) {
+		            changes(new Diff("E", currentPath, rhs, lhs));
+		        }
+		    }
+		}
+		
+		
+		// 
+		// 
+		// 
+		function accumulateDiff(lhs, rhs, prefilter, accum) {
+		    accum = accum || [];
+		    deepDiff(lhs, rhs,
+		        function(diff) {
+		            if (diff) {
+		                accum.push(diff);
+		            }
+		        },
+		        prefilter);
+		    return (accum.length) ? accum : undefined;
+		}
+		
+		
+		// 
+		// 
+		// 
+		function diffApplyArrayChange(arr, index, change) {
+		    if (change._path && change._path.length) {
+		        var it = arr[index],
+		            i, u = change._path.length - 1;
+		        for (i = 0; i < u; i++) {
+		            it = it[change._path[i]];
+		        }
+		        switch (change.kind) {
+		            case 'A':
+		                diffApplyArrayChange(it[change._path[i]], change.index, change.item);
+		                break;
+		            case 'D':
+		                delete it[change._path[i]];
+		                break;
+		            case 'E':
+		            case 'N':
+		                it[change._path[i]] = change.rhs;
+		                break;
+		        }
+		    } else {
+		        switch (change.kind) {
+		            case 'A':
+		                diffApplyArrayChange(arr[index], change.index, change.item);
+		                break;
+		            case 'D':
+		                arr = diffArrayRemove(arr, index);
+		                break;
+		            case 'E':
+		            case 'N':
+		                arr[index] = change.rhs;
+		                break;
+		        }
+		    }
+		    return arr;
+		}
+		
+		
+		// 
+		// 
+		// 
+		function diffApplyChange(target, source, change) {
+		    if (target && source && change && change.kind) {
+		        var it = target,
+		            i = -1,
+		            last = change._path.length - 1;
+		        while (++i < last) {
+		            if (typeof it[change._path[i]] === 'undefined') {
+		                it[change._path[i]] = (typeof change._path[i] === 'number') ? new Array() : {};
+		            }
+		            it = it[change._path[i]];
+		        }
+		        switch (change.kind) {
+		            case 'A':
+		                diffApplyArrayChange(it[change._path[i]], change.index, change.item);
+		                break;
+		            case 'D':
+		                delete it[change._path[i]];
+		                break;
+		            case 'E':
+		            case 'N':
+		                it[change._path[i]] = change.rhs;
+		                break;
+		        }
+		    }
+		}
+		
+		
+		// 
+		// 
+		// 
+		function applyAttributes( target, source ) {
+		    Wzhik.each([
+		        'id', 
+		        CLASS_NAME,
+		        VALUE,
+		        TEXT,
+		        CHECKED,
+		        SELECTED
+		    ], function( prop ){
+		        source[prop] && (target[prop] = source[prop]);
+		    });
+		}
+		
+		
+		// 
+		// 
+		// 
+		function nodeToObj(node) {
+		    var objNode = {},
+		        i;
+		
+		    if (node.nodeType === 3) {
+		        objNode["text"] = node.data;
+		    } else if (node.nodeType === 8) {
+		        objNode[COMMENT] = node.data;
+		    } else {
+		        objNode[NODE_NAME] = node.nodeName;
+		        if (node.attributes && node.attributes.length > 0) {
+		            objNode[ATTRIBUTES] = [];
+		            for (i = 0; i < node.attributes.length; i++) {
+		                objNode[ATTRIBUTES].push([node.attributes[i].name, node.attributes[i].value]);
+		            }
+		        }
+		        if (node.childNodes && node.childNodes.length > 0) {
+		            objNode[CHILD_NODES] = [];
+		            for (i = 0; i < node.childNodes.length; i++) {
+		                objNode[CHILD_NODES].push(nodeToObj(node.childNodes[i]));
+		            }
+		        }
+		        
+		        applyAttributes(objNode, node);
+		    }
+		    return objNode;
+		}
+		
+		
+		// 
+		// 
+		// 
+		function objToNode(objNode, insideSvg) {
+		    var node, i;
+		    if (objNode.hasOwnProperty(TEXT)) {
+		        node = document.createTextNode(objNode[TEXT]);
+		    } else if (objNode.hasOwnProperty(COMMENT)) {
+		        node = document.createComment(objNode[COMMENT]);
+		    } else {
+		        if (objNode[NODE_NAME] === 'svg' || insideSvg) {
+		            node = document.createElementNS('http://www.w3.org/2000/svg', objNode[NODE_NAME]);
+		            insideSvg = true;
+		        } else {
+		            node = document.createElement(objNode[NODE_NAME]);
+		        }
+		        if (objNode[ATTRIBUTES]) {
+		            for (i = 0; i < objNode[ATTRIBUTES].length; i++) {
+		                node.setAttribute(objNode[ATTRIBUTES][i][0], objNode[ATTRIBUTES][i][1]);
+		            }
+		        }
+		        if (objNode[CHILD_NODES]) {
+		            for (i = 0; i < objNode[CHILD_NODES].length; i++) {
+		                node.appendChild(objToNode(objNode[CHILD_NODES][i], insideSvg));
+		            }
+		        }
+		        applyAttributes(node, objNode);
+		    }
+		    return node;
+		}
+		
+		
+		
+		// 
+		// 
+		// 
+		function applyNodeChange( element, diff, source ) {
+		    var 
+		        attr = false,
+		        path = diff._path,
+		        kind = diff.kind, tmpEl;
+		
+		    if( !diff._path ) return ;
+		
+		    for (var i = 0, j, index; i < path.length; i++) {
+		
+		        index = path[i];
+		
+		        if( typeof index === "string" ) {
+		            if( index == CHILD_NODES ) {
+		
+		                tmpEl = element.childNodes[path[++i]];
+		                tmpEl && (element = tmpEl);
+		                source = source[CHILD_NODES][path[i]];
+		
+		
+		            } else if (index == ATTRIBUTES  ) {
+		                attr = source.attributes[path[++i]][0];
+		            } else {
+		                attr = index;
+		            }
+		        }
+		    }
+		
+		    // console.warn(index, attr , source );
+		
+		    _applyNodeChange( element, diff.rhs, attr, kind , diff );
+		
+		}
+		
+		
+		// 
+		// 
+		// 
+		function _applyNodeChange( element, value, attr, kind, diff ) {
+		
+		    if( (attr && (attr = _attrRMap[attr] || attr)) && !value ) {
+		        kind = "D";
+		    }
+		
+		    switch (kind) {
+		        case 'A':
+		            if( diff.item ) {   
+		                if( diff.item.kind === "D" ) {
+		                    element.removeChild(element.childNodes[diff.index]);
+		                }  else if( diff.item.kind === "N" ) {
+		                    element.appendChild(objToNode(diff.item.rhs));
+		                }
+		            } 
+		        break;
+		        case 'D':
+		            if ( attr ) {
+		                if(_attrMap[attr]) {
+		                    delete element[attr];
+		                } else {
+		                    element['removeAttribute']( attr );
+		                }
+		            } else {
+		                element.parentNode.removeChild( element );
+		            }
+		        break;
+		        case 'E':
+		        case 'N':
+		            if ( attr ) {
+		                if(_attrMap[attr]) {
+		                    element[attr] = value;
+		                } else {
+		                    element['setAttribute']( attr, value );
+		                }
+		            } else if( typeof value === "object" ) {
+		                element.appendChild(objToNode(value));
+		            }
+		        break;
+		    }
+		}
+		
+		function cloneObject(obj) {
+		    if(obj == null || typeof(obj) != 'object')
+		        return obj;
+		
+		    var temp = obj.constructor(); // changed
+		
+		    for(var key in obj) {
+		        if(obj.hasOwnProperty(key)) {
+		            temp[key] = cloneObject(obj[key]);
+		        }
+		    }
+		    return temp;
+		}
+		
+		
+		Template.prototype = {
+		
+		    update : function( newData ) {
+		
+		        // var self = this;
+		        // if(!this.olddata) {
+		        //     this.olddata = cloneObject(newData);
+		        // }
+		        // var dataDiffs = accumulateDiff(this.olddata, newData);
+		        // console.log( this.olddata, newData , dataDiffs );
+		        // dataDiffs && dataDiffs.length && Wzhik.each(dataDiffs, function(diff){
+		        //     diffApplyChange(self.olddata, {}, diff);
+		        // });
+		
+		        var element = this.element;
+		
+		        var tmp = element.cloneNode( false );
+		        tmp.innerHTML = this.render( newData );
+		        
+		        var tmpJSON = nodeToObj(tmp);
+		        var diffs = accumulateDiff( this.vdom, tmpJSON );
+		
+		        if( !diffs || !diffs.length ) {
+		            return false;
+		        }
+		
+		        // @todo 
+		        // Make groupping diffs by kind.
+		        // E.g. append documentfragment
+		
+		        for( var diff, k = diffs.length; k--;){
+		            diff = diffs[k];
+		            // 
+		            // Apply change to virtual DOM object
+		            this.updateVDOM(diff);
+		            // 
+		            // Apply change to real DOM object
+		            applyNodeChange(element, diff, tmpJSON);
+		        }
+		
+		    },
+		
+		    'attach' : function( selector ){
+		    	this.element = $(selector || this.id)[0];
+		        return this;
+		    },
+		
+		    'renderTo' : function( data ) {
+		    	this.element.innerHTML = this.render(data);
+		        this.updateVDOM();
+		    },
+		
+		    diffs : [],
+		
+		    updateVDOM : function( diff ){
+		        var self = this;
+		        if (diff ) {
+		            self.diffs.push( diff );
+		        }
+		        clearTimeout(this.t);
+		        self.t = setTimeout(function(){
+		            if( diff ) {
+		                var tmp;
+		                while( tmp = self.diffs.pop() ) {
+		                    diffApplyChange(self.vdom, {}, tmp);
+		                }
+		            } else {
+		                self.vdom = nodeToObj(self.element);   
+		            }
+		        }, 0);
+		    }
+		}
+	}
 
 
 	
@@ -153,6 +745,13 @@
 		    return str.substring(i, ++j);
 		}
 	}
+	
+	
+	var isArray = Array.isArray || function(arg) {
+	    return toString.call(arg) === '[object Array]';
+	};
+	
+	
 	
 	if( SUPPORT_FILTERS ) {
 		var isChrome = root['chrome'];
@@ -209,7 +808,8 @@
 	    					variable, '===', value,
 	    					"in template", "#" +templateID,
 	    					"at line #", lineNumber, 
-	    					"(", (_cacheOriginals[templateID][originalLineNumber] || "").trim(), ")");
+	    					"(", (_cacheOriginals[templateID][originalLineNumber] || "").trim(), ")"
+	    				);
 	    			}
 				}
 			}
@@ -247,9 +847,9 @@
 	
 	//
 	//
-	function parseTemplateString( templateString, name){
+	function parseTemplateString( templateString, name, isPartial){
 	
-		var parsedLinesIndex;
+		var parsedLinesIndex = 0;
 		var parsedLines;
 		var tokens = templateString.split( CLOSE_TAG );
 	
@@ -310,25 +910,29 @@
 	
 		} else {
 	
-			// Wzhik doesnt support extending, so we use default code
-			parsedLinesIndex = 1;
+			if( !isPartial ) {
+				// Wzhik doesnt support extending, so we use default code
+				parsedLinesIndex = 1;
 	
-			// if( DEBUG ) {
-				
-			// 	parsedLines = {
-			// 		0 : {
-			// 			operator: KEY_JS,
-			// 			_code : CODE_FIRST 
-			// 		}
-			// 	}
-			// } else {
-				parsedLines = {
-					0 : {
-						operator: KEY_JS,
-						_code : CODE_FIRST
+				// if( DEBUG ) {
+					
+				// 	parsedLines = {
+				// 		0 : {
+				// 			operator: KEY_JS,
+				// 			_code : CODE_FIRST 
+				// 		}
+				// 	}
+				// } else {
+					parsedLines = {
+						0 : {
+							operator: KEY_JS,
+							_code : CODE_FIRST
+						}
 					}
-				}
-			// }
+				// }
+			} else {
+				parsedLines = {};
+			}
 		}
 	
 		// console.log( tokens )
@@ -351,18 +955,16 @@
 				var debugline = tokens[tokenIndex].split(/\n/);
 				if( debugline.length > 1 ) {
 					debugline.forEach(function(ln){
-						// console.log({
-						// 	ln : ln,
-						// 	orig : getOriginalLine(ln, name), 
-						// 	line : line,
-						// 	parse :parsedLinesIndex
-						// });
-					
-						_cacheParsingDebug[name].push({parsed :parsedLinesIndex, original:  getOriginalLine(ln, name)});
+						_cacheParsingDebug[name].push({
+							parsed : parsedLinesIndex,
+							original: getOriginalLine(ln, name)
+						});
 					});
 				} else {
-					_cacheParsingDebug[name].push({parsed :parsedLinesIndex, original:  getOriginalLine(debugline, name)});
-					// _cacheParsingDebug[name].push(line);
+					_cacheParsingDebug[name].push({
+						parsed : parsedLinesIndex,
+						original:  getOriginalLine(debugline, name)
+					});
 				}
 			}
 	
@@ -376,7 +978,10 @@
 			if( l[0] !== ''){
 				
 				if( DEBUG ) {
-					_cacheParsingDebug[name].push({parsed :parsedLinesIndex, original:  getOriginalLine(l[0], name)});
+					_cacheParsingDebug[name].push({
+						parsed :parsedLinesIndex,
+						original:  getOriginalLine(l[0], name)
+					});
 				}
 	
 				parsedLines[parsedLinesIndex++] = {
@@ -388,7 +993,10 @@
 			var code = l[1];
 	
 			if( DEBUG ) {
-				_cacheParsingDebug[name].push({parsed :parsedLinesIndex, original:  getOriginalLine(l[1], name)});
+				_cacheParsingDebug[name].push({
+					parsed : parsedLinesIndex,
+					original:  getOriginalLine(l[1], name)
+				});
 			}
 	
 			if( code ){
@@ -511,7 +1119,7 @@
 		}
 	
 		if( SUPPORT_EXTENDS ) {
-			if( !extended ) {
+			if( !extended && !isPartial ) {
 				parsedLines[parsedLinesIndex++] = {
 					operator : KEY_JS,
 					_code : CODE_LAST
@@ -521,10 +1129,13 @@
 				parsedLines.len = parsedLinesIndex;
 			}
 		} else {
-			parsedLines[parsedLinesIndex++] = {
-				operator : KEY_JS,
-				_code : CODE_LAST
+			if( !isPartial ) {
+				parsedLines[parsedLinesIndex++] = {
+					operator : KEY_JS,
+					_code : CODE_LAST
+				}
 			}
+	
 			parsedLines.len = parsedLinesIndex;
 		}
 	
@@ -569,6 +1180,7 @@
 				if( code.indexOf("{") < 0 ) {
 					code += "{";
 				}
+				
 				return {
 					operator : KEY_JS,
 					_code : code
@@ -673,22 +1285,25 @@
 	function compileTemplateString(str, name, isPartial ){
 	
 		var parsedLines = parseTemplateString(str, name);
-		var parsedLinesIndex = parsedLines.len;
-		var compiledLines = Array(parsedLinesIndex);
+		var parsedLinesLength = parsedLines.len;
+		var compiledLines = Array(parsedLinesLength);
 		var compiledLinesIndex = 0;
 		var lastOperator,line, operator;
 	
-		// console.log(_cacheParsingDebug[name], parsedLinesIndex )
+		// console.log(_cacheParsingDebug[name], parsedLinesLength )
 	
-		for(var i = -1, l = parsedLinesIndex; ++i < l;){
+		for(var parsedLineIndex = -1; ++parsedLineIndex < parsedLinesLength;){
 	
-			line = parsedLines[i];
+			line = parsedLines[parsedLineIndex];
 			operator = line.operator;
 	
 			if( lastOperator !== operator || operator === KEY_JS)
 				compiledLines[compiledLinesIndex++] = ';';
 	
 			var v = line._code;
+	
+			// @todo
+			// compiledLines[compiledLinesIndex++] = operatorList[ operator ]( line._code );
 	
 			// Plain javascript
 			if(operator === KEY_JS){
@@ -708,15 +1323,8 @@
 				// 
 				// compiledLines[compiledLinesIndex++] = OUTPUT_VAR + '.push(' + '"<!--' + v[0] + '-->");';
 				compiledLines[compiledLinesIndex++] = (
-					"var " + arr + "=" + v[0] +
-					";Wzhik.each(" + arr + ",function(" + item + "," + iter + "," + item + "_isFirst," + item + "_isLast," + item + "_isEven" + "){"
-					// var a1 = data.array,
-					// "var " + arr + "=" + v[0] + 
-					// ";for(var " + iter + "=0," + item + "," + len + "=" + arr + ".length;" +
-					// 	iter + "<" + len + ";" + iter + "++){" + item + "=" + arr + "[" + iter + "];" + 
-					// 	"var " + item + "_isFirst=(" + iter + "==0)," + 
-					// 			 item + "_isLast=(" + iter + "=="+len+"-1)," + 
-					// 			 item + "_isEven=(" + iter + "%2)"
+					OUTPUT_OPETATOR_VAR + " " + arr + "=" + v[0] + ";"
+					+ WZHIK_NAME+ ".each(" + arr + ",function(" + item + "," + iter + "," + item + "_isFirst," + item + "_isLast," + item + "_isEven" + "){"
 				);
 	
 			// Block operator
@@ -727,7 +1335,7 @@
 			} else {
 	
 				if( DEBUG ) {
-					var origline = getOriginalLineFromParsedIndex(i, name);
+					var origline = getOriginalLineFromParsedIndex(parsedLineIndex, name);
 					if( origline ) {
 						compiledLines[compiledLinesIndex++] = "try{";
 					}
@@ -738,10 +1346,11 @@
 					if ( DEBUG ) {
 						var variable = v;
 	
-						if( SUPPORT_EXPERIMENTAL && v.charAt(0) !== "'" ) {
+						if( false && SUPPORT_EXPERIMENTAL && v.charAt(0) !== "'" ) {
 							// @todo ?
 							v = v.trim();
-							var variableComment = '"<!--' + v + '-->"';
+							// var variableComment = '"<!--' + v + '-->"';
+							var variableComment = "'&#8203;'";
 							variable = variableComment + "+" + v;
 						}
 	
@@ -784,15 +1393,15 @@
 	
 					if(lastOperator !== OPERATOR_ECHO){
 						if( IGNORE_NULLS ) {
-							compiledLines[compiledLinesIndex++] = (OUTPUT_VAR + '+=') + v;
+							compiledLines[compiledLinesIndex++] = (OUTPUT_VAR + OUTPUT_OPETATOR_EXT_CONCAT) + v;
 						} else {
-							compiledLines[compiledLinesIndex++] = (OUTPUT_VAR + '+=') + '(' + v + ')';
+							compiledLines[compiledLinesIndex++] = (OUTPUT_VAR + OUTPUT_OPETATOR_EXT_CONCAT) + '(' + v + ')';
 						}
 					} else {
 						if( IGNORE_NULLS ) {
-							compiledLines[compiledLinesIndex++] = '+' + v;
+							compiledLines[compiledLinesIndex++] = OUTPUT_OPETATOR_CONCAT + v;
 						} else {
-							compiledLines[compiledLinesIndex++] = '+(' + v + ')';
+							compiledLines[compiledLinesIndex++] = OUTPUT_OPETATOR_CONCAT + '(' + v + ')';
 						}
 						
 					}
@@ -805,14 +1414,17 @@
 	
 	
 		if( DEBUG ) {
+			// debugger template ID
 			compiledLines.unshift("var _t"+(TUID++)+"='"+name+"';");
 	
 			var compiled = compiledLines.join('\n');
 	
-			try {
-				console.log("Compiled function: ", js_beautify(compiled));
-			} catch(e) {
-				console.log("Compiled function: ", compiled);
+			if( DEBUG_PRINT_COMPILED ) {
+				try {
+					console.log("Compiled function: ", js_beautify(compiled));
+				} catch(e) {
+					console.log("Compiled function: ", compiled);
+				}
 			}
 	
 			return compiled;
@@ -821,64 +1433,9 @@
 			return compiledLines.join('');
 		}
 	}
-	
-
-	//
-	//
-	//
-	function Wzhik(templateString, templateID, isPartial ){
-
-		if(templateString.charAt(0) === "#"){
-			templateID = templateString;
-			if( DEBUG ) {
-				var element = document.getElementById(templateString.substr(1));
-				if( !element ) {
-					console.error("The is no element with ID ", templateString);
-				}
-
-				templateString = element.innerHTML;
-
-			} else {
-				templateString = document.getElementById(templateString.substr(1)).innerHTML;
-			}
-		}
-
-		!templateID && (templateID = ("t" + UID++));
-
-		// if(templateID && _cacheCompiled[templateID])
-		// 	return _cacheCompiled[templateID];
-
-		if(_cacheCompiledByTpl[templateString])
-			return _cacheCompiledByTpl[templateString];
-
-		if( DEBUG ) {
-			(console.groupCollapsed || console.group)( "tpl: " + templateID );
-		}
-
-		var compiled = compileTemplateString(templateString, templateID, isPartial);
-
-		if( DEBUG ) {
-			console.groupEnd("tpl: " + templateID);
-		}
-
-		var fn = new Function(INPUT_VAR, compiled);
-
-		_cacheCompiledByTpl[templateString] = fn;
-
-		if(templateID && !_cacheCompiled[templateID]){
-			// _cacheCompiled[templateID] = fn;
-			_cacheCompiled[templateID] = compiled;
-		}
-
-		return fn;
-    }
-
-
-    // "_experimental.js"
 
     
     if( DEBUG ) {
-
     	
     	var _cacheParsingDebug = {};
     	var _cacheOriginals = {};
@@ -934,28 +1491,6 @@
     	}
     	
     	
-    	function getlines(){}
-    	
-    	
-    	function wrapWithTryCatch(){}
-    	
-    	
-    	function log(){}
-    	
-    	
-    	function getInfo( templateID ){}
-    	
-    	
-    	function UID(){}
-    	
-    	
-    	Wzhik["displayError"] = function displayError(){}
-    	
-    	Wzhik["displayWarning"] = function displayWarning(){}
-    	
-    	Wzhik["displayInfo"] = function displayInfo(){}
-    	
-    	
     	if(!root['console']) {
     		console = root['console'] = {};
     	}
@@ -971,10 +1506,10 @@
     // For tests usage only
     root[WZHIK_NAME]['_name'] = WZHIK_NAME;
 
-    if( typeof exports !== 'undefined' ) {
+    if( server ) {
     	module['exports'] = Wzhik;
     } else {
     	root[WZHIK_NAME] = Wzhik;
     }
 
-}( this );
+}( this, typeof exports !== 'undefined', this.$ );
