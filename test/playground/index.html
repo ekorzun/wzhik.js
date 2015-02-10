@@ -1,0 +1,49 @@
+<html>
+<head>
+	<!-- browser version -->
+</head>
+<body>
+
+	<div id="preview">
+		
+	</div>
+
+	<script id="tpl" type="text/tpl">
+		<h1 data-color="{{= data.c }}">{{= data.name }}</h1>
+		<h2>{{= data.word }}</h2>
+		<ul>
+			{{ for(data.list) }}
+				<li>{{= item }}</li>
+			{{end}}
+		</ul>
+	</script>
+
+	<script src="http://code.jquery.com/jquery-2.1.1.js"></script>
+	<script src="../../vendor/jsbeautifer.js"></script>
+	<script src="../../dist/wzhik.dev.js"></script>
+
+	<script>
+		var tpl = Wzhik("#tpl");
+		var data = {name : "evgeny", list : [1,2,3], x : 10, y : 20, c : "black"};
+		var preview = $("#preview");
+
+		preview.html(tpl.render(data));
+
+		tpl.observe( data, preview );
+
+		data.c = "red";
+
+		
+		// test
+		// var t;
+		// $(document).keydown(function(e){
+		// 	e.preventDefault();
+		// 	clearTimeout(t);
+		// 	data.word += String.fromCharCode(e.keyCode);
+		// 	t = setTimeout(function(){
+		// 		data.word = " ";
+		// 	}, 3000);
+		// });
+	</script>
+</body>
+</html>

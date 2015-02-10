@@ -1,0 +1,169 @@
+<script type="text/tpl" id="wzhikTemplate">
+	<div class="item" data-guid="{{= data.guid }}" data-id="{{= data.id }}">
+		<div class="header {{= data.gender }}">
+			<div class="pic"><img src="{{= data.picture }}" alt="{{= data.name }}"></div>
+			<div class="name">{{= data.name }} <span>{{= data.age }}</span></div>
+			<div class="company">{{= data.company }}</div>
+			<div class="contact">
+				<span>{{= data.email }}</span>
+				<b>{{= data.phone }}</b>
+				<i>{{= data.address }}</i>
+			</div>
+			<div class="status">
+				{{ if(data.isActive) }}
+					online
+				{{ end }}
+			</div>
+			<div class="balance">{{= data.balance }}</div>
+		</div>
+		<div class="body">
+			<h4>Since {{= data.registered }}</h4>
+			<div class="coords">{{= data.latitude }}, {{= data.longitude }}</div>
+			<div class="about">{{= data.about }}</div>
+		</div>
+		<div class="footer">
+			<ul class="tags">
+				{{ for(data.tags, tag) }}
+					<li>{{= tag }}</li>
+				{{ end }}
+			</ul>
+			<h2>My Friends</h2>
+			<ul class="friends">
+				{{ for(data.friends, friend) }}
+					<li>{{= friend }}</li>
+				{{ end }}
+			</ul>
+		</div>
+	</div>
+</script>
+
+
+
+
+
+
+
+<script type="text/tpl" id="underscoreTemplate">
+	<div class="item" data-guid="<%= guid %>" data-id="<%= id %>">
+		<div class="header <%= gender %>">
+			<div class="pic"><img src="<%= picture %>" alt="<%= name %>"></div>
+			<div class="name"><%= name %> <span><%= age %></span></div>
+			<div class="company"><%= company %></div>
+			<div class="contact">
+				<span><%= email %></span>
+				<b><%= phone %></b>
+				<i><%= address %></i>
+			</div>
+			<div class="status">
+				<% if(isActive) { %>
+					online
+				<% } %>
+			</div>
+			<div class="balance"><%= balance %></div>
+		</div>
+		<div class="body">
+			<h4>Since <%= registered %></h4>
+			<div class="coords"><%= latitude %>, <%= longitude %></div>
+			<div class="about"><%= about %></div>
+		</div>
+		<div class="footer">
+			<ul class="tags">
+				<% _.for(tags, function(tag){ %>
+					<li><%= tag %></li>
+				<% }); %>
+			</ul>
+			<h2>My Friends</h2>
+			<ul class="friends">
+				<% _.for(friends, function(friend){ %>
+					<li><%= friend %></li>
+				<% }); %>
+			</ul>
+		</div>
+	</div>
+</script>
+
+
+
+<script type="text/tpl" id="mustacheTemplate">
+	<div class="item" data-guid=" {{guid}}" data-id=" {{id}}">
+		<div class="header  {{gender}}">
+			<div class="pic"><img src=" {{picture}}" alt=" {{name}}"></div>
+			<div class="name"> {{name}} <span> {{age}}</span></div>
+			<div class="company"> {{company}}</div>
+			<div class="contact">
+				<span> {{email}} </span>
+				<b> {{phone}} </b>
+				<i> {{address}}</i>
+			</div>
+			<div class="status">
+				{{#isActive}}
+					online
+				{{/isActive}}
+				{{^isActive}}
+
+				{{/isActive}}
+			</div>
+			<div class="balance"> {{balance}}</div>
+		</div>
+		<div class="body">
+			<h4>Since  {{registered}}</h4>
+			<div class="coords"> {{latitude}},  {{longitude}}</div>
+			<div class="about"> {{about}}</div>
+		</div>
+		<div class="footer">
+			<ul class="tags">
+				{{#tags}}
+					<li> {{.}}</li>
+				{{/tags}}
+			</ul>
+			<h2>My Friends</h2>
+			<ul class="friends">
+				{{#friends}}
+					<li> {{.}}</li>
+				{{/friends}}
+			</ul>
+		</div>
+	</div>
+</script>
+
+
+
+
+<script type="text/tpl" id="kendoTemplate">
+	<div class="item" data-guid="#= data.guid #" data-id="#= data.id #">
+		<div class="header #= data.gender #">
+			<div class="pic"><img src="#= data.picture #" alt="#= data.name #"></div>
+			<div class="name">#= data.name # <span>#= data.age #</span></div>
+			<div class="company">#= data.company #</div>
+			<div class="contact">
+				<span>#= data.email #</span>
+				<b>#= data.phone #</b>
+				<i>#= data.address #</i>
+			</div>
+			<div class="status">
+				# if(data.isActive) { #
+					online
+				# } #
+			</div>
+			<div class="balance">#= data.balance #</div>
+		</div>
+		<div class="body">
+			<h4>Since #= data.registered #</h4>
+			<div class="coords">#= data.latitude #, #= data.longitude #</div>
+			<div class="about">#= data.about #</div>
+		</div>
+		<div class="footer">
+			<ul class="tags">
+				# for (var i = 0, l = data.tags.length; i < l; i++) { #
+					<li>#= data.tags[i] #</li>
+				# } #
+			</ul>
+			<h2>My Friends</h2>
+			<ul class="friends">
+				# for (var i = 0, l = data.friends.length; i < l; i++) { #
+					<li>#= data.friends[i] #</li>
+				# } #
+			</ul>
+		</div>
+	</div>
+</script>

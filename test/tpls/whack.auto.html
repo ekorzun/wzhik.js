@@ -1,0 +1,65 @@
+<script type="text/tpl" id="rl-header">
+	<div class="item__top _clear">
+		<div class="item__topLike">
+			<a class="item__likes {{= item.userVote ? '_active' : '' }}" data-vote="like" data-action="vote" data-param="like"  href="#">
+				<span class="item__likesCount" data-counter="likes">{{= item.likes }}</span>
+				<i class="ycm-icon ycm-icon-thumbs-up"></i>
+			</a>
+			<a class="item__menu _textBig" data-action="itemMenu" href="#"><i class="ycm-icon ycm-icon-triple-menu"></i></a>
+			<a class="item__cancel _dotted" data-action="itemMenuClose" href="#">отмена</a>
+		</div>
+
+		<a href="/user/{{= item.content_username }}" class="thumb"><img class="thumb__img" src="{{= item.content_user_avatar }}"></a>
+		<a href="/user/{{= item.content_username }}" class="title _small">{{= item.content_user_fullname }}</a>
+		<div class="repost">
+			{{ if( item.via_username ) }}
+				<i class="ycm-icon ycm-icon-arrow _left"></i>
+				<a href="/user/{{= item.via_username }}" class="title _small">{{= item.via_fullname }}</a>
+			{{ end }}
+		</div>
+	</div>
+</script>
+
+<script type="text/tpl" id="rl-body">
+	<div class="item__container">
+		<div class="item__content" data-action="goNext">
+			{{ block content }}
+				<img data-role="content" class="item__contentImage" src="{{= item.mbig_image }}">
+			{{ endblock }}
+			<div class="item__longpost">
+				<i class="ycm-icon ycm-icon-chevron-down"></i>
+			</div>
+		</div>
+		<div data-prop="description" class="item__desc">
+			{{= item.description }}
+		</div>
+		<div>
+			{{ for(item.tags, tag) }}
+				<a class="comment-hashtag-link" href="/tag/{{= tag}}">#{{= tag }}</a>
+			{{ end }}
+		</div>
+	</div>
+</script>
+
+<script type="text/tpl" id="rl-body-vid">
+	{{ extends #rl-body }}
+	{{ block content }}
+		<a class="play-btn-overlay" data-play="1"></a>
+		<div class="item__videoThumb">
+			<div class="b-item-big__player"></div>
+			<img data-role="content" class="item__contentImage" src="{{= item.mbig_image }}" >
+		</div>
+	{{ endblock }}
+</script>
+
+
+<script type="text/tpl" id="rl-full">
+	{{ for(data.items) }}
+		{{ include #rl-header }}
+		{{ if( item.type == 1) }}
+			{{ include #rl-body }}
+		{{ else }}
+			{{ include #rl-body-vid }}
+		{{ end }}
+	{{ end }}
+</script>
