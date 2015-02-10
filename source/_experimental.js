@@ -1,109 +1,91 @@
-if(SUPPORT_EXPERIMENTAL) {
-
-	var NODETYPE_COMMENT = 8;
 
 
-	function findElementComments( element , comments) {
-		if( !comments ) {
-			comments = {};
-		}
+//= "_vdom3.js"
 
-		var children;
+function cloneObject(obj) {
+    if(obj == null || typeof(obj) != 'object')
+        return obj;
 
-		if( !element || !(children = element.childNodes) ) {
-			return comments;
-		} 
+    var temp = obj.constructor(); // changed
 
-		if( element.nodeType == NODETYPE_COMMENT ){
-			comments[element.data] = element.nextSibling;
-		}
-
-		for(var i = -1, l = children.length ; ++i < l; ) {
-			findElementComments(children[i], comments);
-		}
-
-		return comments;
-	}
-
-    function tpl( render ){
-    	
-    	this.render = render;
-
-    	this.update = function( element, variable, value ){
-    		
-    		if( USE_WITH === false ) {
-    			variable = INPUT_VAR + "." + variable;
-    		}
-
-    		// jquery element can be passed
-    		element = element.jquery ? element[0] : element;
-
-    		var vars = findElementComments( element );
-
-    		if( vars[variable] ) {
-    			if( DEBUG ) {
-    				vars[variable].data = Wzhik.v(value);
-    			} else {
-    				vars[variable].data = Wzhik.v(value);
-    			}
-    		}
-    	}
-
-    	this.observe = function( data, element ){
-    		var self = this;
-    		Object.observe(data, function(changes){
-			    changes.forEach(function(change) {
-			    	console.log(change.type, change.name, change.oldValue);
-			        self.update( preview, change.name, data[change.name] );
-			    });
-			});
-    	}
+    for(var key in obj) {
+        if(obj.hasOwnProperty(key)) {
+            temp[key] = cloneObject(obj[key]);
+        }
     }
+    return temp;
+}
 
 
-    // Redefine
-    function Wzhik(templateString, templateID){
+Template.prototype = {
 
-		if(templateString.charAt(0) === "#"){
-			templateID = templateString;
-			if( DEBUG ) {
-				var element = document.getElementById(templateString.substr(1));
-				if( !element ) {
-					console.error("The is no element with ID ", templateString);
-				}
+    update : function( newData ) {
 
-				templateString = element.innerHTML;
+        // var self = this;
+        // if(!this.olddata) {
+        //     this.olddata = cloneObject(newData);
+        // }
+        // var dataDiffs = accumulateDiff(this.olddata, newData);
+        // console.log( this.olddata, newData , dataDiffs );
+        // dataDiffs && dataDiffs.length && Wzhik.each(dataDiffs, function(diff){
+        //     diffApplyChange(self.olddata, {}, diff);
+        // });
 
-			} else {
-				templateString = document.getElementById(templateString.substr(1)).innerHTML;
-			}
-		}
+        var element = this.element;
 
-		!templateID && (templateID = ("t" + UID++));
+        var tmp = element.cloneNode( false );
+        tmp.innerHTML = this.render( newData );
+        
+        var tmpJSON = nodeToObj(tmp);
+        var diffs = accumulateDiff( this.vdom, tmpJSON );
 
-		if(_cacheCompiledByTpl[templateString])
-			return _cacheCompiledByTpl[templateString];
+        if( !diffs || !diffs.length ) {
+            return false;
+        }
 
-		if( DEBUG ) {
-			console.group( "tpl: " + templateID );
-		}
+        // @todo 
+        // Make groupping diffs by kind.
+        // E.g. append documentfragment
 
-		var compiled = compileTemplateString(templateString, templateID);
+        for( var diff, k = diffs.length; k--;){
+            diff = diffs[k];
+            // 
+            // Apply change to virtual DOM object
+            this.updateVDOM(diff);
+            // 
+            // Apply change to real DOM object
+            applyNodeChange(element, diff, tmpJSON);
+        }
 
-		if( DEBUG ) {
-			console.groupEnd("tpl: " + templateID);
-		}
+    },
 
-		var fn = new tpl(new Function(INPUT_VAR, compiled));
+    'attach' : function( selector ){
+    	this.element = $(selector || this.id)[0];
+        return this;
+    },
 
-		_cacheCompiledByTpl[templateString] = fn;
+    'renderTo' : function( data ) {
+    	this.element.innerHTML = this.render(data);
+        this.updateVDOM();
+    },
 
-		if(templateID && !_cacheCompiled[templateID]){
-			// _cacheCompiled[templateID] = fn;
-			_cacheCompiled[templateID] = compiled;
-		}
+    diffs : [],
 
-		return fn;
-    }	
-	
+    updateVDOM : function( diff ){
+        var self = this;
+        if (diff ) {
+            self.diffs.push( diff );
+        }
+        clearTimeout(this.t);
+        self.t = setTimeout(function(){
+            if( diff ) {
+                var tmp;
+                while( tmp = self.diffs.pop() ) {
+                    diffApplyChange(self.vdom, {}, tmp);
+                }
+            } else {
+                self.vdom = nodeToObj(self.element);   
+            }
+        }, 0);
+    }
 }
