@@ -53,28 +53,6 @@ function createLinesMap( templateString, name ) {
 }
 
 
-function getlines(){}
-
-
-function wrapWithTryCatch(){}
-
-
-function log(){}
-
-
-function getInfo( templateID ){}
-
-
-function UID(){}
-
-
-Wzhik["displayError"] = function displayError(){}
-
-Wzhik["displayWarning"] = function displayWarning(){}
-
-Wzhik["displayInfo"] = function displayInfo(){}
-
-
 if(!root['console']) {
 	console = root['console'] = {};
 }
