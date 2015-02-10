@@ -1,4 +1,11 @@
 
+
+var isArray = Array.isArray || function(arg) {
+    return toString.call(arg) === '[object Array]';
+};
+
+
+
 if( SUPPORT_FILTERS ) {
 	var isChrome = root['chrome'];
 	var _filters = {}, doc = root.document;
@@ -54,7 +61,8 @@ if( IGNORE_NULLS ) {
     					variable, '===', value,
     					"in template", "#" +templateID,
     					"at line #", lineNumber, 
-    					"(", (_cacheOriginals[templateID][originalLineNumber] || "").trim(), ")");
+    					"(", (_cacheOriginals[templateID][originalLineNumber] || "").trim(), ")"
+    				);
     			}
 			}
 		}
